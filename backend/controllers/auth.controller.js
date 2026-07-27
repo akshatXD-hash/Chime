@@ -2,12 +2,13 @@ import { User } from "../models/userModel.js";
 import z from "zod";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { uploadToCloudinary } from "../config/cloudinary.js";
 
 const signupBody = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  pic: z.string().url("Invalid image URL").optional(),
+  pic: z.string().optional(),
 });
 
 export const signUp = async (req, res) => {
@@ -30,14 +31,27 @@ export const signUp = async (req, res) => {
       });
     }
 
+    let avatarUrl = pic;
+
+    if (req.file) {
+      const uploadResult = await uploadToCloudinary(req.file.buffer, "chime/avatars");
+      avatarUrl = uploadResult.secure_url;
+    } else if (pic && (pic.startsWith("data:") || pic.startsWith("http"))) {
+      try {
+        const uploadResult = await uploadToCloudinary(pic, "chime/avatars");
+        avatarUrl = uploadResult.secure_url;
+      } catch (uploadErr) {
+        console.error("Cloudinary upload warning:", uploadErr.message);
+      }
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
       name,
       email,
-      
       password: hashedPassword,
-      pic, 
+      pic: avatarUrl, 
     });
 
     const token = jwt.sign(
@@ -69,6 +83,36 @@ export const signUp = async (req, res) => {
     });
   }
 };
+
+export const uploadAvatar = async (req, res) => {
+  try {
+    let fileSource;
+    if (req.file) {
+      fileSource = req.file.buffer;
+    } else if (req.body && req.body.image) {
+      fileSource = req.body.image;
+    } else {
+      return res.status(400).json({ message: "No image file or image string provided" });
+    }
+
+    const uploadResult = await uploadToCloudinary(fileSource, "chime/avatars");
+
+    if (req.user && req.user.id) {
+      await User.findByIdAndUpdate(req.user.id, { pic: uploadResult.secure_url });
+    }
+
+    return res.status(200).json({
+      message: "Avatar uploaded successfully",
+      url: uploadResult.secure_url,
+    });
+  } catch (err) {
+    console.error("Upload avatar error:", err);
+    return res.status(500).json({
+      message: "Failed to upload avatar image",
+    });
+  }
+};
+
 
 const signinBody = z.object({
   email: z.string().email("Invalid email address"),
