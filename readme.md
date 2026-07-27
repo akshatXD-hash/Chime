@@ -1,19 +1,20 @@
-# Chat App Backend
+# Chat App Backend 💬
 
-A RESTful backend for a real-time chat application built with **Node.js**, **Express.js**, and **MongoDB**. It provides user authentication using JWT stored in HTTP-only cookies and serves as the API for the chat application.
+Backend API for a real-time chat application built with **Node.js**, **Express.js**, and **MongoDB**. It provides secure user authentication using JWT stored in HTTP-only cookies and exposes REST APIs for managing users and chat functionality.
 
-## 🚀 Features
+## ✨ Features
 
-- User Signup
-- User Sign In
-- JWT Authentication
-- HTTP-only Cookie Authentication
-- Password Hashing with bcrypt
-- MongoDB with Mongoose
-- Input Validation using Zod
-- Error Handling
-- Secure Authentication Middleware
-- RESTful API Structure
+- 🔐 User Authentication (Signup & Signin)
+- 🍪 JWT Authentication with HTTP-only Cookies
+- 🔒 Password Hashing using bcrypt
+- ✅ Request Validation using Zod
+- 🗄️ MongoDB Database with Mongoose
+- ⚡ RESTful API Architecture
+- 🛡️ Secure Authentication Middleware
+- 🌐 CORS Configuration
+- ⚠️ Centralized Error Handling
+
+---
 
 ## 🛠️ Tech Stack
 
@@ -21,89 +22,92 @@ A RESTful backend for a real-time chat application built with **Node.js**, **Exp
 - Express.js
 - MongoDB
 - Mongoose
-- JWT
+- JWT (jsonwebtoken)
 - bcrypt
 - Zod
 - Cookie Parser
 - CORS
 - dotenv
 
-## 📁 Folder Structure
+---
+
+## 📂 Project Structure
 
 ```
 backend/
-│── controllers/
-│── middleware/
-│── models/
-│── routes/
-│── config/
-│── .env
-│── server.js
-│── package.json
+├── controllers/
+├── middleware/
+├── models/
+├── routes/
+├── config/
+├── .env
+├── server.js
+└── package.json
 ```
+
+---
 
 ## ⚙️ Environment Variables
 
-Create a `.env` file in the root directory.
+Create a `.env` file in the project root.
 
 ```env
 PORT=5000
 MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
+JWT_SECRET=your_secret_key
 NODE_ENV=development
 ```
 
-## 📦 Installation
+---
 
-Clone the repository
+## 🚀 Getting Started
+
+### 1. Clone the repository
 
 ```bash
 git clone <repository-url>
 ```
 
-Navigate to the backend
+### 2. Navigate into the backend folder
 
 ```bash
 cd backend
 ```
 
-Install dependencies
+### 3. Install dependencies
 
 ```bash
 npm install
 ```
 
-Start the development server
+### 4. Start the development server
 
 ```bash
 npm run dev
 ```
 
-Or start normally
+The server will run on:
 
-```bash
-npm start
+```
+http://localhost:5000
 ```
 
-## 🔐 Authentication
-
-Authentication is implemented using **JWT** stored in **HTTP-only cookies**.
-
-After a successful signup or signin, a token is generated and stored securely in the browser cookie.
+---
 
 ## 📌 API Endpoints
 
 ### Authentication
 
 | Method | Endpoint | Description |
-|---------|----------|-------------|
+|--------|----------|-------------|
 | POST | `/api/user/signup` | Register a new user |
 | POST | `/api/user/signin` | Login an existing user |
-| POST | `/api/user/logout` | Logout user *(if implemented)* |
 
-## 👤 User Model
+---
 
-```js
+## 👤 User Schema
+
+```javascript
 {
   name: String,
   email: String,
@@ -112,15 +116,29 @@ After a successful signup or signin, a token is generated and stored securely in
 }
 ```
 
-## 🔒 Security
+---
 
-- Passwords hashed using bcrypt
-- JWT Authentication
-- HTTP-only Cookies
-- Input Validation with Zod
-- Secure Cookie Configuration
-- Environment Variables for Secrets
+## 🔐 Authentication Flow
 
-## 📄 License
+1. User signs up or signs in.
+2. Password is securely hashed and verified using **bcrypt**.
+3. A JWT is generated upon successful authentication.
+4. The JWT is stored in an **HTTP-only cookie**.
+5. Protected routes verify the token before granting access.
 
-This project is licensed under the MIT License  .
+---
+
+## 🛡️ Security
+
+- Password hashing with bcrypt
+- JWT-based authentication
+- HTTP-only cookies
+- Zod request validation
+- Environment variables for sensitive data
+- Secure cookie configuration for production
+
+---
+
+## 📜 License
+
+This project is licensed under the **MIT License**.
