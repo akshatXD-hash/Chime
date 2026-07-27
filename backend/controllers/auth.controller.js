@@ -36,7 +36,7 @@ export const signUp = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      pic, // if not provided, Mongoose will use the default value
+      pic, 
     });
 
     const token = jwt.sign(
