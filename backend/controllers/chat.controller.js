@@ -31,3 +31,26 @@ export const getChat = async(req,res)=>{
         return res.status(500).json({message:err.message})
     }
 }
+
+export const fetchChats = async(req,res)=>{
+    try{
+    let chats = await Chat.find({
+        users:req.user.id
+    }).populate("users", "-password")
+        .populate("groupAdmin", "-password")
+        .populate("latestMessage")
+        .sort({ updatedAt: -1 });
+
+
+
+    
+
+    if(!chats){
+        return res.status(404).json({message:"No chats found"}) }
+
+        return res.status(200).json(chats);
+    }catch(err){
+        return res.status(500).json({message:err.message})
+    }
+}
+
