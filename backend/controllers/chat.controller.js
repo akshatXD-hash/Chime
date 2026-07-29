@@ -54,3 +54,29 @@ export const fetchChats = async(req,res)=>{
     }
 }
 
+export const groupChat = async(req,res)=>
+{
+    try{
+    const {name,users} = req.body;
+
+    if(!name || !users){
+        return res.status(400).json({message:"Please fill all the fields"})
+    }
+
+    const grpChat = await Chat.create({
+        chatName:name,
+        isGroupChat:true,
+        users:[...users,req.user.id],
+        groupAdmin:req.user.id
+    })
+
+    const fullGroup = await Chat.findById(grpChat._id)
+        .populate("users", "-password")
+        .populate("groupAdmin", "-password");
+
+    res.json(fullGroup);
+    }catch(err){
+        return res.status(500).json({message:err.message})
+    }
+    
+}
