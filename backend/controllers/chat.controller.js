@@ -105,4 +105,31 @@ const renameGroup = async (req, res) => {
 
 };
 
+export const removeFromGroup = async (req, res) => {
+    try{
+    const {chatId,userId} = req.body;
+
+    if(!chatId || !userId) {
+        return res.status(400).json({message:"Please fill all the fields"})
+    }
+
+    const newChat = await Chat.findByIdAndUpdate(
+        chatId,
+        {
+            $pull:{users:userId}
+        },
+        {
+            new:true
+        }
+    )
+
+    return res.status(200).json(newChat);
+
+    
+    }catch(err){
+        console.log(err);
+        return res.status(500).json({message:err.message})
+    }
+}
+
 
