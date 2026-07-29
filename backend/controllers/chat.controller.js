@@ -132,4 +132,24 @@ export const removeFromGroup = async (req, res) => {
     }
 }
 
+export const addToGroup = async(req,res)=>{
+    const {chatId,userId} = req.body;
+
+    if(!chatId || !userId) {
+        return res.status(400).json({message:"Please fill all the fields"})
+    }
+
+    const chat = await Chat.findByIdAndUpdate(
+        chatId,
+        {
+            $push:{users:userId}
+        },
+        {
+            new:true
+        }
+    )
+
+    return res.status(200).json(chat);
+}
+
 
