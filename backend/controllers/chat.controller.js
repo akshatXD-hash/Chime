@@ -80,3 +80,29 @@ export const groupChat = async(req,res)=>
     }
     
 }
+
+const renameGroup = async (req, res) => {
+
+    const { chatId, chatName } = req.body;
+
+    const chat = await Chat.findByIdAndUpdate(
+        chatId,
+        {
+            chatName
+        },
+        {
+            new: true
+        }
+    );
+
+    if (!chat) {
+        return res.status(404).json({
+            message: "Chat not found"
+        });
+    }
+
+    res.json(chat);
+
+};
+
+
