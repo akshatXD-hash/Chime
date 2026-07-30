@@ -1,6 +1,6 @@
 # Chime 💬 — Real-time Chat Application
 
-Chime is a modern, high-performance, real-time web chat application featuring a sleek **3-column messaging layout** powered by **Node.js**, **Express.js**, **MongoDB**, **Socket.io**, **React**, **Vite**, and **Tailwind CSS** with a **100xDevs inspired dark slate color palette**.
+Chime is a modern, high-performance, real-time web chat application featuring a sleek **3-column messaging layout** powered by **Node.js**, **Express.js**, **MongoDB**, **Socket.io**, **React**, **Vite**, and **Tailwind CSS** with a polished dark slate color palette.
 
 ---
 
