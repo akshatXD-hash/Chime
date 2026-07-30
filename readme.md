@@ -1,61 +1,63 @@
-# Chat App Backend 💬
+# Chime 💬 — Real-time WhatsApp Style Chat Application
 
-Backend API for a real-time chat application built with **Node.js**, **Express.js**, and **MongoDB**. It provides secure user authentication using JWT stored in HTTP-only cookies and exposes REST APIs for managing users and chat functionality.
-
-## ✨ Features
-
-- 🔐 User Authentication (Signup & Signin)
-- 🍪 JWT Authentication with HTTP-only Cookies
-- 🔒 Password Hashing using bcrypt
-- ✅ Request Validation using Zod
-- 🗄️ MongoDB Database with Mongoose
-- ⚡ RESTful API Architecture
-- 🛡️ Secure Authentication Middleware
-- 🌐 CORS Configuration
-- ⚠️ Centralized Error Handling
+Chime is a modern, high-performance, real-time web chat application featuring a sleek **WhatsApp Web 3-column architecture** powered by **Node.js**, **Express.js**, **MongoDB**, **Socket.io**, **React**, **Vite**, and **Tailwind CSS** with a **100xDevs inspired dark slate color palette**.
 
 ---
 
-## 🛠️ Tech Stack
+## 🎨 100xDevs Color Palette & Design System
 
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-- JWT (jsonwebtoken)
-- bcrypt
-- Zod
-- Cookie Parser
-- CORS
-- dotenv
+- **Primary Background**: `#050811` (Deep obsidian dark)
+- **Sidebar & Surface Container**: `#0B0F19` (Dark slate container)
+- **Cards & Chat Panels**: `#121827` (Glassmorphism dark card)
+- **Primary Glowing Accent**: `#3B82F6` (Electric Royal Blue) to `#2563EB`
+- **Cyan Highlights**: `#38BDF8` (Status & Typing indicators)
+- **Outgoing Chat Bubble**: `#1E3A8A` to `#1D4ED8` (Gradient dark blue bubble)
+- **Incoming Chat Bubble**: `#121827` with `#202B42` border
+
+---
+
+## ✨ Features
+
+- 🔐 **User Authentication**: JWT-based signin and signup with Cloudinary profile avatar upload.
+- 💬 **Real-time Messaging**: Socket.io instant message delivery & auto-scrolling timeline.
+- ⚡ **Typing Indicators**: Real-time typing status with animated debounced indicators.
+- 👥 **Group Chat Management**: Create groups, rename groups, add members, and remove members with admin controls.
+- 🎤 **Voice Notes & Media Attachments**: Send audio messages and image attachments with full-screen lightbox viewer.
+- 📞 **Voice & Video Calling UI**: Simulated calling screen overlay with timer and controls.
+- 🔔 **Audio Notifications**: Web Audio API sound pop on receiving messages.
+- 📱 **Fully Responsive**: WhatsApp Web style 3-column desktop layout with mobile-responsive view drawers.
 
 ---
 
 ## 📂 Project Structure
 
 ```
-backend/
-├── controllers/
-├── middleware/
-├── models/
-├── routes/
-├── config/
-├── .env
-├── server.js
-└── package.json
+chime/
+├── backend/                # Express & Socket.io server
+│   ├── config/             # DB & Cloudinary configuration
+│   ├── controllers/        # Auth, Chat, Message, User controllers
+│   ├── middleware/         # Auth JWT middleware & upload setup
+│   ├── models/             # Mongoose schemas (User, Chat, Message)
+│   ├── routers/            # Express routes (/api/auth, /api/user, /api/chat, /api/message)
+│   └── index.js            # Server entry point & Socket.io handlers
+└── frontend/               # Vite React single page application
+    ├── public/             # Assets & Chime logo SVG
+    └── src/
+        ├── api/            # Axios API service instances
+        ├── components/     # NavRail, ChatList, MessageBubble, MessageInput, Modals
+        ├── context/        # AuthContext, ChatContext, SocketContext
+        ├── index.css       # Tailwind directives & 100xDevs theme rules
+        ├── App.jsx         # Main 3-column layout frame
+        └── main.jsx        # App mounting entry point
 ```
 
 ---
 
-## ⚙️ Environment Variables
+## 🌐 Deployed Backend Base URL
 
-Create a `.env` file in the project root.
-
-```env
-PORT=5000
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_secret_key
-NODE_ENV=development
+The application points to the deployed backend server:
+```
+https://chime-gjoi.onrender.com
 ```
 
 ---
@@ -63,79 +65,26 @@ NODE_ENV=development
 ## 🚀 Getting Started
 
 ### 1. Clone the repository
-
 ```bash
 git clone <repository-url>
+cd chime
 ```
 
-### 2. Navigate into the backend folder
-
+### 2. Run Backend (Local fallback)
 ```bash
 cd backend
-```
-
-### 3. Install dependencies
-
-```bash
 npm install
-```
-
-### 4. Start the development server
-
-```bash
 npm run dev
 ```
 
-The server will run on:
-
-```
-http://localhost:5000
-```
-
----
-
-## 📌 API Endpoints
-
-### Authentication
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/user/signup` | Register a new user |
-| POST | `/api/user/signin` | Login an existing user |
-
----
-
-## 👤 User Schema
-
-```javascript
-{
-  name: String,
-  email: String,
-  password: String,
-  pic: String
-}
+### 3. Run Frontend
+```bash
+cd frontend
+npm install
+npm run dev
 ```
 
----
-
-## 🔐 Authentication Flow
-
-1. User signs up or signs in.
-2. Password is securely hashed and verified using **bcrypt**.
-3. A JWT is generated upon successful authentication.
-4. The JWT is stored in an **HTTP-only cookie**.
-5. Protected routes verify the token before granting access.
-
----
-
-## 🛡️ Security
-
-- Password hashing with bcrypt
-- JWT-based authentication
-- HTTP-only cookies
-- Zod request validation
-- Environment variables for sensitive data
-- Secure cookie configuration for production
+Access the frontend app at `http://localhost:5173`.
 
 ---
 
