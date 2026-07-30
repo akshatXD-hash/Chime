@@ -114,7 +114,7 @@ export const renameGroup = async (req, res) => {
         {
             new: true
         }
-    );
+    ).populate("users", "-password").populate("groupAdmin", "-password");
 
     if (!chat) {
         return res.status(404).json({
