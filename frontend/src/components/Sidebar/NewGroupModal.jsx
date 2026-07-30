@@ -95,7 +95,7 @@ export const NewGroupModal = ({ isOpen, onClose }) => {
               type="text"
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
-              placeholder="e.g. 100xDevs Cohort 3"
+              placeholder="e.g. Project Alpha Team"
               className="w-full px-3.5 py-2.5 rounded-xl glass-input text-sm"
             />
           </div>
