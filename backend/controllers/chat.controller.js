@@ -46,7 +46,13 @@ export const fetchChats = async(req,res)=>{
         users:req.user.id
     }).populate("users", "-password")
         .populate("groupAdmin", "-password")
-        .populate("latestMessage")
+        .populate({
+            path: "latestMessage",
+            populate: {
+                path: "sender",
+                select: "name pic email",
+            },
+        })
         .sort({ updatedAt: -1 });
 
 
