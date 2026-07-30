@@ -16,7 +16,14 @@ export const getChat = async(req,res)=>{
             users:{
                 $all:[req.user.id,userId]
             }
-        }).populate("users","-password");
+        }).populate("users","-password")
+          .populate({
+              path: "latestMessage",
+              populate: {
+                  path: "sender",
+                  select: "name pic email",
+              },
+          });
 
         if(chat){
             return res.json(chat);
