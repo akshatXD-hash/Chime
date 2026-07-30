@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { userApi } from '../../api/userApi';
 import { useChat } from '../../context/ChatContext';
 import { Search, X, UserPlus, Loader2, MessageSquare } from 'lucide-react';
@@ -10,22 +10,37 @@ export const UserSearchModal = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  if (!isOpen) return null;
-
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
-
+  const fetchUsers = async (query = '') => {
     setLoading(true);
     setError(null);
     try {
-      const results = await userApi.searchUsers(searchQuery);
+      const results = await userApi.searchUsers(query);
       setSearchResults(results);
     } catch (err) {
-      setError(err.message || 'Failed to search users');
+      setError(err.message || 'Failed to fetch users');
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      setSearchQuery('');
+      fetchUsers('');
+    }
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  const handleQueryChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    fetchUsers(query);
+  };
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    fetchUsers(searchQuery);
   };
 
   const handleSelectUser = async (userId) => {
@@ -58,24 +73,22 @@ export const UserSearchModal = ({ isOpen, onClose }) => {
         </div>
 
         {/* Search Input Form */}
-        <form onSubmit={handleSearch} className="mb-4">
+        <form onSubmit={handleFormSubmit} className="mb-4">
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-devs-textMuted" />
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={handleQueryChange}
               placeholder="Search by name or email..."
-              className="w-full pl-10 pr-20 py-2.5 rounded-xl glass-input text-sm"
+              className="w-full pl-10 pr-10 py-2.5 rounded-xl glass-input text-sm"
               autoFocus
             />
-            <button
-              type="submit"
-              disabled={loading || !searchQuery.trim()}
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg devs-gradient-btn text-white text-xs font-semibold disabled:opacity-50"
-            >
-              {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Search'}
-            </button>
+            {loading && (
+              <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
+                <Loader2 className="w-4 h-4 text-devs-blue animate-spin" />
+              </div>
+            )}
           </div>
         </form>
 
@@ -83,9 +96,9 @@ export const UserSearchModal = ({ isOpen, onClose }) => {
         <div className="max-h-72 overflow-y-auto space-y-2 pr-1">
           {error && <p className="text-xs text-red-400 p-2">{error}</p>}
 
-          {searchResults.length === 0 && !loading && (
+          {!loading && searchResults.length === 0 && (
             <p className="text-center text-xs text-devs-textMuted py-8">
-              Search users by email or name to begin messaging
+              {searchQuery.trim() ? 'No users found matching your search' : 'No other users found'}
             </p>
           )}
 
@@ -100,7 +113,7 @@ export const UserSearchModal = ({ isOpen, onClose }) => {
                   {userItem.pic ? (
                     <img src={userItem.pic} alt={userItem.name} className="w-full h-full object-cover" />
                   ) : (
-                    userItem.name.charAt(0).toUpperCase()
+                    userItem.name?.charAt(0).toUpperCase()
                   )}
                 </div>
                 <div>
