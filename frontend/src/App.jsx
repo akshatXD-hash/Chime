@@ -61,7 +61,7 @@ const MainLayout = () => {
               <MessageSquare className="w-10 h-10 text-white" />
             </div>
             <h1 className="text-3xl font-extrabold text-white tracking-tight mb-2">
-              Chime Web for <span className="devs-gradient-text">100xDevs</span>
+              Welcome to <span className="devs-gradient-text">Chime</span>
             </h1>
             <p className="text-sm text-devs-textSecondary max-w-md mb-6 leading-relaxed">
               Send and receive real-time messages, share audio notes, and collaborate with your team instantly.
