@@ -1,9 +1,9 @@
 import React from 'react';
 import { useChat } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
-import { Phone, Video, Search, Info, ArrowLeft, Users as GroupIcon } from 'lucide-react';
+import { Info, ArrowLeft, Users as GroupIcon } from 'lucide-react';
 
-export const ChatHeader = ({ onToggleDetails, onStartCall, onBackMobile }) => {
+export const ChatHeader = ({ onToggleDetails, onBackMobile }) => {
   const { user } = useAuth();
   const { selectedChat, typingMap } = useChat();
 
@@ -75,26 +75,6 @@ export const ChatHeader = ({ onToggleDetails, onStartCall, onBackMobile }) => {
 
       {/* Right: Actions */}
       <div className="flex items-center gap-1 text-devs-textSecondary">
-        <button
-          onClick={() => onStartCall('audio')}
-          title="Start Audio Call"
-          className="p-2.5 rounded-xl hover:bg-devs-hover hover:text-white transition-colors"
-        >
-          <Phone className="w-4 h-4" />
-        </button>
-        <button
-          onClick={() => onStartCall('video')}
-          title="Start Video Call"
-          className="p-2.5 rounded-xl hover:bg-devs-hover hover:text-white transition-colors"
-        >
-          <Video className="w-4 h-4" />
-        </button>
-        <button
-          title="Search in Chat"
-          className="p-2.5 rounded-xl hover:bg-devs-hover hover:text-white transition-colors"
-        >
-          <Search className="w-4 h-4" />
-        </button>
         <button
           onClick={onToggleDetails}
           title="Chat Information"
