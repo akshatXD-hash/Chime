@@ -13,7 +13,6 @@ import { MessageList } from './components/Chat/MessageList';
 import { MessageInput } from './components/Chat/MessageInput';
 import { ChatDetailsSidebar } from './components/Chat/ChatDetailsSidebar';
 import { ProfileModal } from './components/Modals/ProfileModal';
-import { CallModal } from './components/Modals/CallModal';
 import { MessageSquare } from 'lucide-react';
 
 const MainLayout = () => {
@@ -25,20 +24,6 @@ const MainLayout = () => {
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [callState, setCallState] = useState({ isOpen: false, type: 'audio' });
-
-  const getActiveCallContactName = () => {
-    if (!selectedChat) return 'Unknown';
-    if (selectedChat.isGroupChat) return selectedChat.chatName;
-    const target = selectedChat.users?.find((u) => u._id !== user?._id);
-    return target?.name || 'Contact';
-  };
-
-  const getActiveCallContactPic = () => {
-    if (!selectedChat || selectedChat.isGroupChat) return null;
-    const target = selectedChat.users?.find((u) => u._id !== user?._id);
-    return target?.pic;
-  };
 
   return (
     <div className="flex h-screen w-screen bg-devs-bg overflow-hidden text-devs-text select-none">
@@ -64,7 +49,6 @@ const MainLayout = () => {
           <>
             <ChatHeader
               onToggleDetails={() => setIsDetailsOpen(!isDetailsOpen)}
-              onStartCall={(type) => setCallState({ isOpen: true, type })}
               onBackMobile={() => setSelectedChat(null)}
             />
             <MessageList />
@@ -99,13 +83,6 @@ const MainLayout = () => {
       <UserSearchModal isOpen={isSearchModalOpen} onClose={() => setIsSearchModalOpen(false)} />
       <NewGroupModal isOpen={isGroupModalOpen} onClose={() => setIsGroupModalOpen(false)} />
       <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
-      <CallModal
-        isOpen={callState.isOpen}
-        callType={callState.type}
-        contactName={getActiveCallContactName()}
-        contactPic={getActiveCallContactPic()}
-        onClose={() => setCallState({ ...callState, isOpen: false })}
-      />
     </div>
   );
 };
