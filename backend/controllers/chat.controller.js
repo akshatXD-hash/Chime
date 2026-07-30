@@ -142,7 +142,7 @@ export const removeFromGroup = async (req, res) => {
         {
             new:true
         }
-    )
+    ).populate("users", "-password").populate("groupAdmin", "-password");
 
     return res.status(200).json(newChat);
 
