@@ -57,7 +57,7 @@
   outline: none;
 }
 
-/* Glowing accent effects inspired by 100xDevs */
+/* Glowing accent effects */
 .devs-gradient-btn {
   background: linear-gradient(135deg, #3B82F6 0%, #2563EB 50%, #1D4ED8 100%);
   box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.39);
