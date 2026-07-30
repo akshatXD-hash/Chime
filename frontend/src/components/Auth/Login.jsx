@@ -66,7 +66,7 @@ export const Login = ({ onSwitchToRegister }) => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="alex@100xdevs.com"
+                placeholder="you@example.com"
                 className="w-full pl-11 pr-4 py-3 rounded-xl glass-input text-sm"
                 required
               />
