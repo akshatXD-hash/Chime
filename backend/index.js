@@ -3,10 +3,10 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import cors from "cors";
 import { connectDb } from "./config/db.js";
-import {authRouter} from "./routers/authRouter.js";
-import {userRouter} from "./routers/userRouter.js";
-import {chatRouter} from "./routers/chatRouter.js";
-import {messageRouter} from "./routers/messageRouter.js";
+import { authRouter } from "./routers/authRouter.js";
+import { userRouter } from "./routers/userRouter.js";
+import { chatRouter } from "./routers/chatRouter.js";
+import { messageRouter } from "./routers/messageRouter.js";
 import { Server } from "socket.io";
 dotenv.config();
 
@@ -20,6 +20,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:4173",
   "https://chime-gjoi.onrender.com",
+  "https://chime-murex.vercel.app/"
 ];
 
 app.use(
@@ -37,10 +38,10 @@ app.use(
 app.use(cookieParser())
 
 
-app.use("/api/auth",authRouter);
-app.use("/api/user",userRouter);
-app.use("/api/chat",chatRouter);
-app.use("/api/message",messageRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/user", userRouter);
+app.use("/api/chat", chatRouter);
+app.use("/api/message", messageRouter);
 
 
 const PORT = process.env.PORT || 3000;
