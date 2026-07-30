@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageSquare, CircleDashed, Phone, Star, Settings, LogOut, User as UserIcon } from 'lucide-react';
+import { MessageSquare, Settings, LogOut, User as UserIcon } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
 
@@ -9,9 +9,6 @@ export const NavRail = ({ activeTab, setActiveTab, onOpenProfile, onOpenSettings
 
   const navItems = [
     { id: 'chats', label: 'Chats', icon: MessageSquare },
-    { id: 'status', label: 'Status', icon: CircleDashed },
-    { id: 'calls', label: 'Calls', icon: Phone },
-    { id: 'starred', label: 'Starred', icon: Star },
   ];
 
   return (
