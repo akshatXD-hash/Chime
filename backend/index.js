@@ -5,6 +5,7 @@ import cors from "cors";
 import { connectDb } from "./config/db.js";
 import {authRouter} from "./routers/authRouter.js";
 import {userRouter} from "./routers/userRouter.js";
+import { Server } from "socket.io";
 dotenv.config();
 
 
@@ -23,8 +24,46 @@ app.use("/api/user",userRouter);
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   connectDb();
 });
 
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000",
+  },
+  pingTimeout: 60000,
+});
+io.on("connection", (socket) => {
+  console.log("A user connected");
+  // User logs in
+  socket.on("setup", (user) => {
+    socket.join(user._id);
+    socket.emit("connected");
+  });
+  // User opens a chat
+  socket.on("join-chat", (chatId) => {
+    socket.join(chatId);
+    console.log(`Joined chat ${chatId}`);
+  });
+  // Typing indicator
+  socket.on("typing", (chatId) => {
+    socket.to(chatId).emit("typing");
+  });
+  socket.on("stop-typing", (chatId) => {
+    socket.to(chatId).emit("stop-typing");
+  });
+  // New message
+  socket.on("send-message", (message) => {
+    const { chat, sender } = message;
+    if (!chat?.users) return;
+    chat.users.forEach((user) => {
+      if (user._id === sender._id) return;
+      socket.to(user._id).emit("receive-message", message);
+    });
+  });
+  socket.on("disconnect", () => {
+    console.log("User disconnected");
+  });
+});
