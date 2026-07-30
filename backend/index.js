@@ -5,6 +5,8 @@ import cors from "cors";
 import { connectDb } from "./config/db.js";
 import {authRouter} from "./routers/authRouter.js";
 import {userRouter} from "./routers/userRouter.js";
+import {chatRouter} from "./routers/chatRouter.js";
+import {messageRouter} from "./routers/messageRouter.js";
 import { Server } from "socket.io";
 dotenv.config();
 
@@ -12,7 +14,7 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cors({
-  origin: ["http://localhost:5173"],
+  origin: ["http://localhost:5173", "http://localhost:3000"],
   credentials: true,
 }));
 app.use(cookieParser())
@@ -20,6 +22,8 @@ app.use(cookieParser())
 
 app.use("/api/auth",authRouter);
 app.use("/api/user",userRouter);
+app.use("/api/chat",chatRouter);
+app.use("/api/message",messageRouter);
 
 
 const PORT = process.env.PORT || 3000;
@@ -31,7 +35,7 @@ const server = app.listen(PORT, () => {
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "*",
   },
   pingTimeout: 60000,
 });

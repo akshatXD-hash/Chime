@@ -89,7 +89,7 @@ export const groupChat = async(req,res)=>
     
 }
 
-const renameGroup = async (req, res) => {
+export const renameGroup = async (req, res) => {
 
     const { chatId, chatName } = req.body;
 
@@ -141,21 +141,28 @@ export const removeFromGroup = async (req, res) => {
 }
 
 export const addToGroup = async(req,res)=>{
-    const {chatId,userId} = req.body;
+    try {
+        const {chatId,userId} = req.body;
 
-    if(!chatId || !userId) {
-        return res.status(400).json({message:"Please fill all the fields"})
-    }
-
-    const chat = await Chat.findByIdAndUpdate(
-        chatId,
-        {
-            $push:{users:userId}
-        },
-        {
-            new:true
+        if(!chatId || !userId) {
+            return res.status(400).json({message:"Please fill all the fields"})
         }
-    )
+
+        const chat = await Chat.findByIdAndUpdate(
+            chatId,
+            {
+                $push:{users:userId}
+            },
+            {
+                new:true
+            }
+        ).populate("users", "-password").populate("groupAdmin", "-password");
+
+        return res.status(200).json(chat);
+    } catch(err) {
+        return res.status(500).json({message:err.message});
+    }
 }
+
 
 
