@@ -10,7 +10,7 @@ export const allUsers = async (req, res) => {
       { name: { $regex: search, $options: "i" } },
       { email: { $regex: search, $options: "i" } },
     ],
-  });
+  }).select("-password");
 
   res.status(200).json(users);
 };
