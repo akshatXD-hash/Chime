@@ -20,7 +20,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:4173",
   "https://chime-gjoi.onrender.com",
-  "https://chime-murex.vercel.app/"
+  "https://chime-murex.vercel.app"
 ];
 
 app.use(
