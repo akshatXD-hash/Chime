@@ -112,7 +112,7 @@ export const Register = ({ onSwitchToLogin }) => {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Harkirat Singh"
+                placeholder="John Doe"
                 className="w-full pl-11 pr-4 py-3 rounded-xl glass-input text-sm"
                 required
               />
