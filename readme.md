@@ -4,22 +4,6 @@ Chime is a modern, high-performance, real-time web chat application featuring a 
 
 ---
 
-## 🎨 100xDevs Color Palette & Design System
-
-| Purpose | Color | Hex |
-|---|---|---|
-| Primary Background | Deep obsidian dark | `#050811` |
-| Sidebar & Surface Container | Dark slate container | `#0B0F19` |
-| Cards & Chat Panels | Glassmorphism dark card | `#121827` |
-| Primary Glowing Accent | Electric Royal Blue | `#3B82F6` → `#2563EB` |
-| Cyan Highlights | Status & typing indicators | `#38BDF8` |
-| Outgoing Chat Bubble | Gradient dark blue bubble | `#1E3A8A` → `#1D4ED8` |
-| Incoming Chat Bubble | Neutral dark card with border | `#121827` (border `#202B42`) |
-
-The theme leans on soft glows, subtle glassmorphism, and low-saturation slate tones to keep long chat sessions easy on the eyes while still feeling premium and "dev-tool" polished.
-
----
-
 ## ✨ Features
 
 ### 🔐 Authentication & Profile
@@ -99,7 +83,7 @@ chime/
         ├── api/                 # Axios API service instances
         ├── components/          # NavRail, ChatList, MessageBubble, MessageInput, Modals
         ├── context/              # AuthContext, ChatContext, SocketContext
-        ├── index.css             # Tailwind directives & 100xDevs theme rules
+        ├── index.css             # Tailwind directives & theme rules
         ├── App.jsx               # Main 3-column layout frame
         └── main.jsx              # App mounting entry point
 ```
