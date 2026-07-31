@@ -76,10 +76,15 @@ io.on("connection", (socket) => {
   });
   // Typing indicator
   socket.on("typing", (chatId) => {
-    socket.to(chatId).emit("typing");
+    if (chatId) {
+      socket.to(chatId.toString()).emit("typing", chatId);
+    }
   });
+
   socket.on("stop-typing", (chatId) => {
-    socket.to(chatId).emit("stop-typing");
+    if (chatId) {
+      socket.to(chatId.toString()).emit("stop-typing", chatId);
+    }
   });
   // New message
   socket.on("send-message", (message) => {
