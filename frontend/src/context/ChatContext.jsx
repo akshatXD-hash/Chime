@@ -187,22 +187,57 @@ export const ChatProvider = ({ children }) => {
   const sendMessage = async (content) => {
     if (!selectedChat || !content.trim()) return;
 
-    try {
-      const message = await messageApi.sendMessage(content, selectedChat._id);
-      setMessages((prev) => [...prev, message]);
+    const tempId = 'temp_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+    const tempMessage = {
+      _id: tempId,
+      content,
+      sender: user,
+      chat: selectedChat,
+      createdAt: new Date().toISOString(),
+      isOptimistic: true,
+    };
 
-      // Emit socket event
+    // 1. Instant optimistic update in local state for sender
+    setMessages((prev) => [...prev, tempMessage]);
+    setChats((prev) =>
+      prev
+        .map((c) =>
+          c._id === selectedChat._id
+            ? { ...c, latestMessage: tempMessage, updatedAt: new Date().toISOString() }
+            : c
+        )
+        .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+    );
+
+    try {
+      // 2. Persist to server
+      const message = await messageApi.sendMessage(content, selectedChat._id);
+
+      // 3. Replace temp message with server response
+      setMessages((prev) =>
+        prev.map((m) => (m._id === tempId ? message : m))
+      );
+
+      // 4. Emit socket event for instant real-time delivery to recipient
       if (socket) {
         socket.emit('send-message', message);
       }
 
-      // Update chats list latestMessage
+      // Update chats list with final saved message
       setChats((prev) =>
-        prev.map((c) => (c._id === selectedChat._id ? { ...c, latestMessage: message } : c))
+        prev
+          .map((c) =>
+            c._id === selectedChat._id
+              ? { ...c, latestMessage: message, updatedAt: new Date().toISOString() }
+              : c
+          )
+          .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
       );
 
       return message;
     } catch (err) {
+      // Revert optimistic message if error occurred
+      setMessages((prev) => prev.filter((m) => m._id !== tempId));
       console.error('Failed to send message:', err.message);
       throw err;
     }
