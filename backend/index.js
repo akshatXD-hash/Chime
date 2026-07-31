@@ -89,11 +89,24 @@ io.on("connection", (socket) => {
   // New message
   socket.on("send-message", (message) => {
     const { chat, sender } = message;
-    if (!chat?.users) return;
-    chat.users.forEach((user) => {
-      if (user._id === sender._id) return;
-      socket.to(user._id).emit("receive-message", message);
-    });
+    if (!chat) return;
+
+    const senderId = (sender?._id || sender)?.toString();
+    const chatId = (chat?._id || chat)?.toString();
+
+    // 1. Emit to the specific chat room
+    if (chatId) {
+      socket.to(chatId).emit("receive-message", message);
+    }
+
+    // 2. Emit directly to each user's personal room in the chat
+    if (chat.users && Array.isArray(chat.users)) {
+      chat.users.forEach((user) => {
+        const userId = (user?._id || user)?.toString();
+        if (!userId || userId === senderId) return;
+        socket.to(userId).emit("receive-message", message);
+      });
+    }
   });
   socket.on("disconnect", () => {
     console.log("User disconnected");
