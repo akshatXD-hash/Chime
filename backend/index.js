@@ -62,7 +62,10 @@ io.on("connection", (socket) => {
   console.log("A user connected");
   // User logs in
   socket.on("setup", (user) => {
-    socket.join(user._id);
+    if (!user?._id) return;
+    const userId = user._id.toString();
+    socket.join(userId);
+    console.log(`User connected & setup in room: ${userId}`);
     socket.emit("connected");
   });
   // User opens a chat
