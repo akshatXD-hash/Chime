@@ -94,7 +94,7 @@ export const ChatProvider = ({ children }) => {
 
       const activeChatId = selectedChatRef.current?._id;
 
-      // If message is for currently active selectedChat, append it
+
       if (activeChatId && activeChatId === chatId) {
         setMessages((prev) => {
           if (prev.some((m) => m._id === newMessage._id)) return prev;
