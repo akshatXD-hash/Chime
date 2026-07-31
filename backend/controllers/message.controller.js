@@ -28,9 +28,7 @@ export const getMessages = async (req, res) => {
 }
 
 export const sendMessage = async (req, res) => {
-
     try {
-
         const { content, chatId } = req.body;
 
         if (!content || !chatId) {
@@ -39,28 +37,32 @@ export const sendMessage = async (req, res) => {
             });
         }
 
-        let message = await Message.create({
+        const message = await Message.create({
             sender: req.user.id,
             content,
             chat: chatId
         });
 
-        message = await Message.findById(message._id)
-            .populate("sender", "-password")
-            .populate("chat");
+        const [populatedMessage] = await Promise.all([
+            Message.findById(message._id)
+                .populate("sender", "-password")
+                .populate({
+                    path: "chat",
+                    populate: {
+                        path: "users",
+                        select: "-password"
+                    }
+                }),
+            Chat.findByIdAndUpdate(chatId, {
+                latestMessage: message._id
+            })
+        ]);
 
-        await Chat.findByIdAndUpdate(chatId, {
-            latestMessage: message._id
-        });
-
-        return res.json(message);
+        return res.json(populatedMessage);
 
     } catch (err) {
-
         return res.status(500).json({
             message: err.message
         });
-
     }
-
 };
