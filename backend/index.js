@@ -70,8 +70,9 @@ io.on("connection", (socket) => {
   });
   // User opens a chat
   socket.on("join-chat", (chatId) => {
-    socket.join(chatId);
-    console.log(`Joined chat ${chatId}`);
+    if (!chatId) return;
+    socket.join(chatId.toString());
+    console.log(`Joined chat room: ${chatId}`);
   });
   // Typing indicator
   socket.on("typing", (chatId) => {
