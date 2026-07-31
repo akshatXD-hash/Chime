@@ -110,6 +110,11 @@ export const ChatProvider = ({ children }) => {
 
       // Update latestMessage in chats list and bring active chat to top
       setChats((prevChats) => {
+        const chatExists = prevChats.some((c) => c._id === chatId);
+        if (!chatExists) {
+          loadChats();
+          return prevChats;
+        }
         return prevChats
           .map((c) => {
             if (c._id === chatId) {
