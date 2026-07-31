@@ -42,6 +42,13 @@ export const ChatProvider = ({ children }) => {
     }
   }, [user]);
 
+  // Join socket chat room immediately when selectedChat or socket changes
+  useEffect(() => {
+    if (socket && selectedChat?._id) {
+      socket.emit('join-chat', selectedChat._id);
+    }
+  }, [selectedChat?._id, socket]);
+
   // Load messages when selectedChat changes
   useEffect(() => {
     if (!selectedChat || !selectedChat._id) {
@@ -57,11 +64,6 @@ export const ChatProvider = ({ children }) => {
 
         // Clear unread count for this chat
         setUnreadMap((prev) => ({ ...prev, [selectedChat._id]: 0 }));
-
-        // Join socket chat room
-        if (socket) {
-          socket.emit('join-chat', selectedChat._id);
-        }
       } catch (err) {
         console.error('Error fetching messages:', err.message);
       } finally {
@@ -70,7 +72,7 @@ export const ChatProvider = ({ children }) => {
     };
 
     loadMessages();
-  }, [selectedChat?._id, socket]);
+  }, [selectedChat?._id]);
 
   // Handle incoming real-time socket events
   useEffect(() => {
