@@ -1,22 +1,29 @@
 import { Message } from "../models/messageModel.js";
 import { Chat } from "../models/chatModel.js";
 
-export const getMessages =  async(req,res)=>{
-    try{
-    const {chatId} = req.params;
+export const getMessages = async (req, res) => {
+    try {
+        const { chatId } = req.params;
 
-    const messages = await Message.find({
-        chat:chatId
-    }).populate("sender", "-password")
-        .populate("chat");
+        const messages = await Message.find({
+            chat: chatId
+        })
+            .populate("sender", "-password")
+            .populate({
+                path: "chat",
+                populate: {
+                    path: "users",
+                    select: "-password"
+                }
+            });
 
-    if(!messages) {
-        return res.status(404).json({message:"No messages found"})  
-    }
+        if (!messages) {
+            return res.status(404).json({ message: "No messages found" })
+        }
 
-    return res.status(200).json(messages);
-    }catch(err){
-        return res.status(500).json({message:err.message})
+        return res.status(200).json(messages);
+    } catch (err) {
+        return res.status(500).json({ message: err.message })
     }
 }
 
