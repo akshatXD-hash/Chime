@@ -74,20 +74,29 @@ export const ChatProvider = ({ children }) => {
     loadMessages();
   }, [selectedChat?._id]);
 
+  // Keep a ref to selectedChat to prevent stale closures in socket handlers
+  const selectedChatRef = React.useRef(selectedChat);
+  useEffect(() => {
+    selectedChatRef.current = selectedChat;
+  }, [selectedChat]);
+
   // Handle incoming real-time socket events
   useEffect(() => {
     if (!socket) return;
 
     const handleReceiveMessage = (newMessage) => {
+      if (!newMessage || !newMessage.chat) return;
+
       const chatOfMessage = newMessage.chat;
       const chatId = typeof chatOfMessage === 'object' ? chatOfMessage._id : chatOfMessage;
 
       playNotificationSound();
 
+      const activeChatId = selectedChatRef.current?._id;
+
       // If message is for currently active selectedChat, append it
-      if (selectedChat && selectedChat._id === chatId) {
+      if (activeChatId && activeChatId === chatId) {
         setMessages((prev) => {
-          // Avoid duplicate messages
           if (prev.some((m) => m._id === newMessage._id)) return prev;
           return [...prev, newMessage];
         });
@@ -99,26 +108,34 @@ export const ChatProvider = ({ children }) => {
         }));
       }
 
-      // Update latestMessage in chats list
+      // Update latestMessage in chats list and bring active chat to top
       setChats((prevChats) => {
-        return prevChats.map((c) => {
-          if (c._id === chatId) {
-            return { ...c, latestMessage: newMessage, updatedAt: new Date().toISOString() };
-          }
-          return c;
-        }).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+        return prevChats
+          .map((c) => {
+            if (c._id === chatId) {
+              return { ...c, latestMessage: newMessage, updatedAt: new Date().toISOString() };
+            }
+            return c;
+          })
+          .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
       });
     };
 
-    const handleTyping = () => {
-      if (selectedChat) {
-        setTypingMap((prev) => ({ ...prev, [selectedChat._id]: true }));
+    const handleTyping = (room) => {
+      const activeChatId = selectedChatRef.current?._id;
+      if (!room || room === activeChatId) {
+        if (activeChatId) {
+          setTypingMap((prev) => ({ ...prev, [activeChatId]: true }));
+        }
       }
     };
 
-    const handleStopTyping = () => {
-      if (selectedChat) {
-        setTypingMap((prev) => ({ ...prev, [selectedChat._id]: false }));
+    const handleStopTyping = (room) => {
+      const activeChatId = selectedChatRef.current?._id;
+      if (!room || room === activeChatId) {
+        if (activeChatId) {
+          setTypingMap((prev) => ({ ...prev, [activeChatId]: false }));
+        }
       }
     };
 
@@ -131,7 +148,7 @@ export const ChatProvider = ({ children }) => {
       socket.off('typing', handleTyping);
       socket.off('stop-typing', handleStopTyping);
     };
-  }, [socket, selectedChat]);
+  }, [socket]);
 
   // Access or create 1-on-1 chat
   const accessChat = async (targetUserId) => {
