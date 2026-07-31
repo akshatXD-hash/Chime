@@ -62,7 +62,7 @@ export const ChatProvider = ({ children }) => {
         const data = await messageApi.getMessages(selectedChat._id);
         setMessages(data);
 
-        // Clear unread count for this chat
+
         setUnreadMap((prev) => ({ ...prev, [selectedChat._id]: 0 }));
       } catch (err) {
         console.error('Error fetching messages:', err.message);
@@ -74,13 +74,13 @@ export const ChatProvider = ({ children }) => {
     loadMessages();
   }, [selectedChat?._id]);
 
-  // Keep a ref to selectedChat to prevent stale closures in socket handlers
+
   const selectedChatRef = React.useRef(selectedChat);
   useEffect(() => {
     selectedChatRef.current = selectedChat;
   }, [selectedChat]);
 
-  // Handle incoming real-time socket events
+
   useEffect(() => {
     if (!socket) return;
 
@@ -101,14 +101,14 @@ export const ChatProvider = ({ children }) => {
           return [...prev, newMessage];
         });
       } else {
-        // Increment unread count for other chats
+
         setUnreadMap((prev) => ({
           ...prev,
           [chatId]: (prev[chatId] || 0) + 1,
         }));
       }
 
-      // Update latestMessage in chats list and bring active chat to top
+
       setChats((prevChats) => {
         const chatExists = prevChats.some((c) => c._id === chatId);
         if (!chatExists) {
