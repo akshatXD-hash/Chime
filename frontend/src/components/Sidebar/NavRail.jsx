@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageSquare, Settings, LogOut, User as UserIcon } from 'lucide-react';
+import { Bell, Settings, LogOut, User as UserIcon } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
 
@@ -7,42 +7,14 @@ export const NavRail = ({ activeTab, setActiveTab, onOpenProfile, onOpenSettings
   const { user, logout } = useAuth();
   const { socketConnected } = useSocket();
 
-  const navItems = [
-    { id: 'chats', label: 'Chats', icon: MessageSquare },
-  ];
+
 
   return (
     <div className="w-16 md:w-20 h-full bg-devs-surface border-r border-devs-border flex flex-col items-center justify-between py-4 select-none z-20 flex-shrink-0">
-      {/* Top Section - Logo & Main Nav */}
+      {/* Top Section - Logo */}
       <div className="flex flex-col items-center w-full space-y-6">
-        {/* App Logo */}
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-devs-blue via-blue-600 to-indigo-600 flex items-center justify-center shadow-glow-blue cursor-pointer transition-transform hover:scale-105">
-          <MessageSquare className="w-5 h-5 text-white" />
-        </div>
-
-        {/* Navigation Items */}
-        <div className="flex flex-col items-center space-y-3 w-full px-2">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                title={item.label}
-                className={`relative w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
-                  isActive
-                    ? 'bg-devs-blue text-white shadow-glow-blue'
-                    : 'text-devs-textSecondary hover:bg-devs-hover hover:text-white'
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-                {isActive && (
-                  <span className="absolute -left-1 top-1/2 -translate-y-1/2 w-1 h-5 bg-devs-blue rounded-r-full" />
-                )}
-              </button>
-            );
-          })}
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-devs-blue via-blue-600 to-indigo-600 flex items-center justify-center shadow-glow-blue cursor-pointer transition-transform hover:scale-105" title="Chime">
+          <Bell className="w-5 h-5 text-white" />
         </div>
       </div>
 
