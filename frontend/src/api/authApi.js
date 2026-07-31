@@ -2,7 +2,7 @@ import { axiosClient } from './axiosClient';
 
 export const authApi = {
   signUp: async (formData) => {
-    // If formData is an instance of FormData, send multipart/form-data
+
     const isFormData = formData instanceof FormData;
     const response = await axiosClient.post('/api/auth/signup', formData, {
       headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : {},
