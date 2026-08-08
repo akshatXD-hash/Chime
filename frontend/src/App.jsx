@@ -26,8 +26,8 @@ const MainLayout = () => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   return (
-    <div className="flex h-screen w-screen bg-devs-bg overflow-hidden text-devs-text select-none">
-      {/* 1. Left Vertical Nav Rail */}
+    <div className="flex flex-col md:flex-row h-screen h-[100dvh] w-screen bg-devs-bg overflow-hidden text-devs-text select-none relative">
+      {/* 1. Left Vertical Nav Rail / Mobile Bottom Bar */}
       <NavRail
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -36,7 +36,7 @@ const MainLayout = () => {
       />
 
       {/* 2. Middle Column: Chat List Sidebar */}
-      <div className={`${selectedChat ? 'hidden md:flex' : 'flex'} h-full flex-shrink-0`}>
+      <div className={`${selectedChat ? 'hidden md:flex' : 'flex'} flex-1 md:flex-initial h-full flex-shrink-0 w-full md:w-auto overflow-hidden`}>
         <ChatList
           onOpenSearchModal={() => setIsSearchModalOpen(true)}
           onOpenGroupModal={() => setIsGroupModalOpen(true)}
