@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Mail, Lock, Eye, EyeOff, MessageSquare, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, MessageCircle, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 
 export const Login = ({ onSwitchToRegister }) => {
   const { login } = useAuth();
@@ -29,62 +29,61 @@ export const Login = ({ onSwitchToRegister }) => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-devs-bg flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background ambient glowing spheres */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-devs-blue/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-devs-cyan/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen w-full bg-devs-bg flex items-center justify-center p-4 relative selection:bg-devs-blue selection:text-white">
+      {/* Subtle radial geometric grid background */}
+      <div className="absolute inset-0 bg-[radial-gradient(#1F2942_1px,transparent_1px)] [background-size:32px_32px] opacity-25 pointer-events-none" />
 
-      <div className="w-full max-w-md glass-panel p-8 rounded-2xl shadow-card-dark relative z-10 border border-devs-border">
+      <div className="w-full max-w-md bg-devs-surface/90 backdrop-blur-xl p-8 rounded-3xl shadow-card-dark relative z-10 border border-devs-border/80">
         {/* Header */}
         <div className="flex flex-col items-center text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-devs-blue via-blue-600 to-indigo-600 flex items-center justify-center shadow-glow-blue mb-4">
-            <MessageSquare className="w-8 h-8 text-white" />
+          <div className="w-12 h-12 rounded-2xl bg-devs-blue/10 border border-devs-blue/30 flex items-center justify-center text-devs-blue mb-4">
+            <MessageCircle className="w-6 h-6 text-devs-indigo" />
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white mb-2">
-            Sign in to <span className="devs-gradient-text">Chime</span>
+          <h1 className="text-2xl font-bold tracking-tight text-white mb-1.5">
+            Welcome back to <span className="devs-gradient-text">Chime</span>
           </h1>
-          <p className="text-sm text-devs-textSecondary">
-            Connect instantly with your friends & teams in real-time
+          <p className="text-xs text-devs-textSecondary max-w-xs">
+            Sign in to access your conversations and team messages
           </p>
         </div>
 
         {error && (
-          <div className="mb-6 p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-3 text-red-400 text-sm">
-            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <div className="mb-6 p-3.5 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center gap-3 text-red-400 text-xs font-medium">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-devs-textSecondary uppercase tracking-wider mb-2">
+            <label className="block text-[11px] font-semibold text-devs-textSecondary uppercase tracking-wider mb-1.5">
               Email Address
             </label>
             <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-devs-textMuted" />
+              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-devs-textMuted" />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full pl-11 pr-4 py-3 rounded-xl glass-input text-sm"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl glass-input text-xs"
                 required
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-devs-textSecondary uppercase tracking-wider mb-2">
+            <label className="block text-[11px] font-semibold text-devs-textSecondary uppercase tracking-wider mb-1.5">
               Password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-devs-textMuted" />
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-devs-textMuted" />
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-11 pr-11 py-3 rounded-xl glass-input text-sm"
+                className="w-full pl-10 pr-10 py-2.5 rounded-xl glass-input text-xs"
                 required
               />
               <button
@@ -92,7 +91,7 @@ export const Login = ({ onSwitchToRegister }) => {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3.5 top-1/2 -translate-y-1/2 text-devs-textMuted hover:text-white transition-colors"
               >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
@@ -100,25 +99,25 @@ export const Login = ({ onSwitchToRegister }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 px-4 rounded-xl devs-gradient-btn text-white font-semibold text-sm flex items-center justify-center gap-2 group disabled:opacity-50"
+            className="w-full py-3 px-4 rounded-xl devs-gradient-btn text-white font-semibold text-xs flex items-center justify-center gap-2 group disabled:opacity-50 mt-2"
           >
             {loading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <>
                 <span>Sign In</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </>
             )}
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-devs-border text-center">
-          <p className="text-sm text-devs-textSecondary">
-            Don't have an account?{' '}
+        <div className="mt-6 pt-5 border-t border-devs-border/60 text-center">
+          <p className="text-xs text-devs-textSecondary">
+            Don't have an account yet?{' '}
             <button
               onClick={onSwitchToRegister}
-              className="text-devs-blue hover:text-devs-cyan font-semibold transition-colors"
+              className="text-devs-indigo hover:text-devs-violet font-semibold transition-colors ml-0.5"
             >
               Create Account
             </button>
