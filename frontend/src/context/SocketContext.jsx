@@ -34,6 +34,12 @@ export const SocketProvider = ({ children }) => {
       newSocket.emit('setup', user);
     });
 
+    newSocket.io.on('reconnect', () => {
+      console.log('Socket reconnected');
+      setSocketConnected(true);
+      newSocket.emit('setup', user);
+    });
+
     newSocket.on('connected', () => {
       setSocketConnected(true);
     });
