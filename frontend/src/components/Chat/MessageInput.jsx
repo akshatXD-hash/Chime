@@ -20,19 +20,28 @@ export const MessageInput = () => {
   const typingTimeoutRef = useRef(null);
   const fileInputRef = useRef(null);
 
+  const isTypingEmittedRef = useRef(false);
+
   // Emit typing socket event with debounce
   const handleTextChange = (e) => {
-    setText(e.target.value);
+    const value = e.target.value;
+    setText(value);
 
     if (!socket || !selectedChat) return;
 
-    socket.emit('typing', selectedChat._id);
+    if (value.trim() && !isTypingEmittedRef.current) {
+      socket.emit('typing', selectedChat._id);
+      isTypingEmittedRef.current = true;
+    }
 
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
     typingTimeoutRef.current = setTimeout(() => {
-      socket.emit('stop-typing', selectedChat._id);
-    }, 2000);
+      if (socket && selectedChat) {
+        socket.emit('stop-typing', selectedChat._id);
+      }
+      isTypingEmittedRef.current = false;
+    }, 1200);
   };
 
   const handleEmojiClick = (emojiData) => {
@@ -59,6 +68,8 @@ export const MessageInput = () => {
       if (socket && selectedChat) {
         socket.emit('stop-typing', selectedChat._id);
       }
+      isTypingEmittedRef.current = false;
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     } catch (err) {
       console.error(err);
     } finally {
