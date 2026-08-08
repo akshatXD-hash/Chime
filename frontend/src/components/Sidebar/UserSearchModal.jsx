@@ -56,49 +56,49 @@ export const UserSearchModal = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="w-full max-w-md glass-panel rounded-2xl border border-devs-border shadow-card-dark p-6 overflow-hidden relative animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-devs-surface border border-devs-border/80 rounded-3xl shadow-card-dark p-6 overflow-hidden relative animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-devs-border mb-4">
+        <div className="flex items-center justify-between pb-3.5 border-b border-devs-border/80 mb-4">
           <div className="flex items-center gap-2">
-            <UserPlus className="w-5 h-5 text-devs-blue" />
-            <h3 className="text-lg font-bold text-white">Start New Chat</h3>
+            <UserPlus className="w-4 h-4 text-devs-indigo" />
+            <h3 className="text-sm font-bold text-white">Start New Conversation</h3>
           </div>
           <button
             onClick={onClose}
             className="p-1 rounded-lg text-devs-textMuted hover:text-white hover:bg-devs-hover transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Search Input Form */}
-        <form onSubmit={handleFormSubmit} className="mb-4">
+        <form onSubmit={handleFormSubmit} className="mb-3.5">
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-devs-textMuted" />
             <input
               type="text"
               value={searchQuery}
               onChange={handleQueryChange}
-              placeholder="Search by name or email..."
-              className="w-full pl-10 pr-10 py-2.5 rounded-xl glass-input text-sm"
+              placeholder="Search people by name or email..."
+              className="w-full pl-10 pr-10 py-2.5 rounded-xl glass-input text-xs"
               autoFocus
             />
             {loading && (
               <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
-                <Loader2 className="w-4 h-4 text-devs-blue animate-spin" />
+                <Loader2 className="w-4 h-4 text-devs-indigo animate-spin" />
               </div>
             )}
           </div>
         </form>
 
         {/* Search Results */}
-        <div className="max-h-72 overflow-y-auto space-y-2 pr-1">
+        <div className="max-h-72 overflow-y-auto space-y-1.5 pr-1">
           {error && <p className="text-xs text-red-400 p-2">{error}</p>}
 
           {!loading && searchResults.length === 0 && (
             <p className="text-center text-xs text-devs-textMuted py-8">
-              {searchQuery.trim() ? 'No users found matching your search' : 'No other users found'}
+              {searchQuery.trim() ? 'No users found matching your search' : 'Search users to begin'}
             </p>
           )}
 
@@ -106,10 +106,10 @@ export const UserSearchModal = ({ isOpen, onClose }) => {
             <div
               key={userItem._id}
               onClick={() => handleSelectUser(userItem._id)}
-              className="flex items-center justify-between p-3 rounded-xl glass-card hover:border-devs-blue/50 cursor-pointer transition-all group"
+              className="flex items-center justify-between p-2.5 rounded-xl glass-card hover:border-devs-indigo/50 cursor-pointer transition-all group"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-devs-card border border-devs-border overflow-hidden flex items-center justify-center font-bold text-devs-blue">
+                <div className="w-9 h-9 rounded-xl bg-devs-card border border-devs-border overflow-hidden flex items-center justify-center font-bold text-devs-indigo text-xs shadow-subtle">
                   {userItem.pic ? (
                     <img src={userItem.pic} alt={userItem.name} className="w-full h-full object-cover" />
                   ) : (
@@ -117,13 +117,13 @@ export const UserSearchModal = ({ isOpen, onClose }) => {
                   )}
                 </div>
                 <div>
-                  <h4 className="text-sm font-semibold text-white group-hover:text-devs-blue transition-colors">
+                  <h4 className="text-xs font-semibold text-white group-hover:text-devs-indigo transition-colors">
                     {userItem.name}
                   </h4>
-                  <p className="text-xs text-devs-textMuted">{userItem.email}</p>
+                  <p className="text-[10px] text-devs-textMuted">{userItem.email}</p>
                 </div>
               </div>
-              <MessageSquare className="w-4 h-4 text-devs-textMuted group-hover:text-devs-blue transition-colors" />
+              <MessageSquare className="w-3.5 h-3.5 text-devs-textMuted group-hover:text-devs-indigo transition-colors" />
             </div>
           ))}
         </div>
