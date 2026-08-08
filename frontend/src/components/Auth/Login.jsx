@@ -33,7 +33,7 @@ export const Login = ({ onSwitchToRegister }) => {
       {/* Subtle radial geometric grid background */}
       <div className="absolute inset-0 bg-[radial-gradient(#1F2942_1px,transparent_1px)] [background-size:32px_32px] opacity-25 pointer-events-none" />
 
-      <div className="w-full max-w-md bg-devs-surface/90 backdrop-blur-xl p-8 rounded-3xl shadow-card-dark relative z-10 border border-devs-border/80">
+      <div className="w-full max-w-md bg-devs-surface/90 backdrop-blur-xl p-6 sm:p-8 rounded-3xl shadow-card-dark relative z-10 border border-devs-border/80">
         {/* Header */}
         <div className="flex flex-col items-center text-center mb-8">
           <div className="w-12 h-12 rounded-2xl bg-devs-blue/10 border border-devs-blue/30 flex items-center justify-center text-devs-blue mb-4">
