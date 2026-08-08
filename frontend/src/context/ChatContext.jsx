@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { chatApi } from '../api/chatApi';
 import { messageApi } from '../api/messageApi';
 import { useAuth } from './AuthContext';
@@ -17,6 +17,10 @@ export const ChatProvider = ({ children }) => {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [typingMap, setTypingMap] = useState({});
   const [unreadMap, setUnreadMap] = useState({});
+
+  // Safety timeout refs for typing indicator — auto-clears if stop-typing is never received
+  const typingTimeoutMapRef = useRef({});
+  const prevSelectedChatIdRef = useRef(null);
 
   // Fetch chats on user login
   const loadChats = async () => {
@@ -49,6 +53,23 @@ export const ChatProvider = ({ children }) => {
     }
   }, [selectedChat?._id, socket]);
 
+  // Clear typing state when switching chats
+  useEffect(() => {
+    const prevId = prevSelectedChatIdRef.current;
+    const newId = selectedChat?._id;
+
+    if (prevId && prevId !== newId) {
+      // Clear typing for the chat we just left
+      setTypingMap((prev) => ({ ...prev, [prevId]: false }));
+      // Clear any safety timeout for the old chat
+      if (typingTimeoutMapRef.current[prevId]) {
+        clearTimeout(typingTimeoutMapRef.current[prevId]);
+        delete typingTimeoutMapRef.current[prevId];
+      }
+    }
+    prevSelectedChatIdRef.current = newId;
+  }, [selectedChat?._id]);
+
   // Load messages when selectedChat changes
   useEffect(() => {
     if (!selectedChat || !selectedChat._id) {
@@ -62,7 +83,6 @@ export const ChatProvider = ({ children }) => {
         const data = await messageApi.getMessages(selectedChat._id);
         setMessages(data);
 
-
         setUnreadMap((prev) => ({ ...prev, [selectedChat._id]: 0 }));
       } catch (err) {
         console.error('Error fetching messages:', err.message);
@@ -74,12 +94,18 @@ export const ChatProvider = ({ children }) => {
     loadMessages();
   }, [selectedChat?._id]);
 
-
-  const selectedChatRef = React.useRef(selectedChat);
+  const selectedChatRef = useRef(selectedChat);
   useEffect(() => {
     selectedChatRef.current = selectedChat;
   }, [selectedChat]);
 
+  // Cleanup all typing timeouts on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(typingTimeoutMapRef.current).forEach(clearTimeout);
+      typingTimeoutMapRef.current = {};
+    };
+  }, []);
 
   useEffect(() => {
     if (!socket) return;
@@ -94,20 +120,17 @@ export const ChatProvider = ({ children }) => {
 
       const activeChatId = selectedChatRef.current?._id;
 
-
       if (activeChatId && activeChatId === chatId) {
         setMessages((prev) => {
           if (prev.some((m) => m._id === newMessage._id)) return prev;
           return [...prev, newMessage];
         });
       } else {
-
         setUnreadMap((prev) => ({
           ...prev,
           [chatId]: (prev[chatId] || 0) + 1,
         }));
       }
-
 
       setChats((prevChats) => {
         const chatExists = prevChats.some((c) => c._id === chatId);
@@ -128,30 +151,52 @@ export const ChatProvider = ({ children }) => {
 
     const handleTyping = (room) => {
       const activeChatId = selectedChatRef.current?._id;
-      if (!room || room === activeChatId) {
-        if (activeChatId) {
-          setTypingMap((prev) => ({ ...prev, [activeChatId]: true }));
-        }
+      const targetChatId = room || activeChatId;
+      if (!targetChatId) return;
+
+      setTypingMap((prev) => ({ ...prev, [targetChatId]: true }));
+
+      // Safety timeout: auto-clear typing after 3 seconds if stop-typing is lost
+      if (typingTimeoutMapRef.current[targetChatId]) {
+        clearTimeout(typingTimeoutMapRef.current[targetChatId]);
       }
+      typingTimeoutMapRef.current[targetChatId] = setTimeout(() => {
+        setTypingMap((prev) => ({ ...prev, [targetChatId]: false }));
+        delete typingTimeoutMapRef.current[targetChatId];
+      }, 3000);
     };
 
     const handleStopTyping = (room) => {
       const activeChatId = selectedChatRef.current?._id;
-      if (!room || room === activeChatId) {
-        if (activeChatId) {
-          setTypingMap((prev) => ({ ...prev, [activeChatId]: false }));
-        }
+      const targetChatId = room || activeChatId;
+      if (!targetChatId) return;
+
+      setTypingMap((prev) => ({ ...prev, [targetChatId]: false }));
+
+      // Cancel the safety timeout since we got the explicit stop
+      if (typingTimeoutMapRef.current[targetChatId]) {
+        clearTimeout(typingTimeoutMapRef.current[targetChatId]);
+        delete typingTimeoutMapRef.current[targetChatId];
       }
+    };
+
+    const handleDisconnect = () => {
+      // Clear all typing indicators on disconnect
+      setTypingMap({});
+      Object.values(typingTimeoutMapRef.current).forEach(clearTimeout);
+      typingTimeoutMapRef.current = {};
     };
 
     socket.on('receive-message', handleReceiveMessage);
     socket.on('typing', handleTyping);
     socket.on('stop-typing', handleStopTyping);
+    socket.on('disconnect', handleDisconnect);
 
     return () => {
       socket.off('receive-message', handleReceiveMessage);
       socket.off('typing', handleTyping);
       socket.off('stop-typing', handleStopTyping);
+      socket.off('disconnect', handleDisconnect);
     };
   }, [socket]);
 
