@@ -44,9 +44,14 @@ export const SocketProvider = ({ children }) => {
       setSocketConnected(true);
     });
 
+    newSocket.on('get-online-users', (users) => {
+      setOnlineUsers(Array.isArray(users) ? users : []);
+    });
+
     newSocket.on('disconnect', () => {
       console.log('Socket disconnected');
       setSocketConnected(false);
+      setOnlineUsers([]);
     });
 
     setSocket(newSocket);

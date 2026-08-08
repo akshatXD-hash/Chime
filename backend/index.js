@@ -58,22 +58,31 @@ const io = new Server(server, {
   },
   pingTimeout: 60000,
 });
+const onlineUsersMap = new Map();
+
 io.on("connection", (socket) => {
-  console.log("A user connected");
-  // User logs in
+  console.log("A user connected:", socket.id);
+  let connectedUserId = null;
+
+  // User logs in / setups socket connection
   socket.on("setup", (user) => {
     if (!user?._id) return;
     const userId = user._id.toString();
+    connectedUserId = userId;
     socket.join(userId);
+    onlineUsersMap.set(userId, socket.id);
     console.log(`User connected & setup in room: ${userId}`);
     socket.emit("connected");
+    io.emit("get-online-users", Array.from(onlineUsersMap.keys()));
   });
+
   // User opens a chat
   socket.on("join-chat", (chatId) => {
     if (!chatId) return;
     socket.join(chatId.toString());
     console.log(`Joined chat room: ${chatId}`);
   });
+
   // Typing indicator
   socket.on("typing", (chatId) => {
     if (chatId) {
@@ -86,6 +95,7 @@ io.on("connection", (socket) => {
       socket.to(chatId.toString()).emit("stop-typing", chatId);
     }
   });
+
   // New message
   socket.on("send-message", (message) => {
     const { chat, sender } = message;
@@ -101,14 +111,19 @@ io.on("connection", (socket) => {
 
     // 2. Emit directly to each user's personal room in the chat
     if (chat.users && Array.isArray(chat.users)) {
-      chat.users.forEach((user) => {
-        const userId = (user?._id || user)?.toString();
+      chat.users.forEach((userItem) => {
+        const userId = (userItem?._id || userItem)?.toString();
         if (!userId || userId === senderId) return;
         socket.to(userId).emit("receive-message", message);
       });
     }
   });
+
   socket.on("disconnect", () => {
-    console.log("User disconnected");
+    console.log("User disconnected:", socket.id);
+    if (connectedUserId) {
+      onlineUsersMap.delete(connectedUserId);
+      io.emit("get-online-users", Array.from(onlineUsersMap.keys()));
+    }
   });
 });

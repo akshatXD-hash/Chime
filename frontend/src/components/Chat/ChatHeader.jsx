@@ -1,11 +1,13 @@
 import React from 'react';
 import { useChat } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
+import { useSocket } from '../../context/SocketContext';
 import { Info, ArrowLeft, Users as GroupIcon } from 'lucide-react';
 
 export const ChatHeader = ({ onToggleDetails, onBackMobile }) => {
   const { user } = useAuth();
   const { selectedChat, typingMap } = useChat();
+  const { onlineUsers } = useSocket();
 
   if (!selectedChat) return null;
 
@@ -20,6 +22,12 @@ export const ChatHeader = ({ onToggleDetails, onBackMobile }) => {
   const targetUser = getTargetUser();
   const title = isGroup ? selectedChat.chatName : targetUser?.name || 'Conversation';
   const avatarPic = isGroup ? null : targetUser?.pic;
+
+  const isTargetOnline = targetUser?._id && (
+    Array.isArray(onlineUsers)
+      ? onlineUsers.includes(targetUser._id)
+      : Boolean(onlineUsers[targetUser._id])
+  );
 
   return (
     <div className="h-16 px-4 bg-devs-surface/95 border-b border-devs-border/80 flex items-center justify-between z-10 select-none flex-shrink-0">
@@ -74,10 +82,15 @@ export const ChatHeader = ({ onToggleDetails, onBackMobile }) => {
               <span className="text-devs-textMuted">
                 {selectedChat.users?.map((u) => u.name.split(' ')[0]).join(', ')}
               </span>
-            ) : (
+            ) : isTargetOnline ? (
               <span className="text-emerald-400/90 font-medium flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 Online
+              </span>
+            ) : (
+              <span className="text-devs-textMuted font-medium flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-devs-textMuted/60" />
+                Offline
               </span>
             )}
           </div>

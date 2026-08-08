@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useChat } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
+import { useSocket } from '../../context/SocketContext';
 import { Search, Users, MessageSquarePlus, RefreshCw, Users as GroupIcon } from 'lucide-react';
 
 export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
   const { user } = useAuth();
   const { chats, selectedChat, setSelectedChat, loadingChats, loadChats, unreadMap } = useChat();
+  const { onlineUsers } = useSocket();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterTab, setFilterTab] = useState('all'); // 'all' | 'unread' | 'groups'
 
@@ -13,6 +15,7 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
   const getSenderDetails = (chat) => {
     if (chat.isGroupChat) {
       return {
+        id: null,
         name: chat.chatName,
         pic: null,
         isGroup: true,
@@ -21,6 +24,7 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
     }
     const otherUser = chat.users?.find((u) => u._id !== user?._id) || chat.users?.[0];
     return {
+      id: otherUser?._id,
       name: otherUser?.name || 'Unknown User',
       pic: otherUser?.pic,
       email: otherUser?.email,
@@ -147,6 +151,12 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
           const unreadCount = unreadMap[chat._id] || 0;
           const latestMsg = chat.latestMessage;
 
+          const isUserOnline = !details.isGroup && details.id && (
+            Array.isArray(onlineUsers)
+              ? onlineUsers.includes(details.id)
+              : Boolean(onlineUsers[details.id])
+          );
+
           return (
             <div
               key={chat._id}
@@ -171,6 +181,14 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
                       details.name?.charAt(0).toUpperCase()
                     )}
                   </div>
+                  {!details.isGroup && (
+                    <span
+                      className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-devs-surface ${
+                        isUserOnline ? 'bg-emerald-500' : 'bg-devs-textMuted/40'
+                      }`}
+                      title={isUserOnline ? 'Online' : 'Offline'}
+                    />
+                  )}
                 </div>
 
                 {/* Info & Last message */}
