@@ -34,14 +34,21 @@ export const signUp = async (req, res) => {
     let avatarUrl = pic;
 
     if (req.file) {
-      const uploadResult = await uploadToCloudinary(req.file.buffer, "chime/avatars");
-      avatarUrl = uploadResult.secure_url;
+      try {
+        const uploadResult = await uploadToCloudinary(req.file.buffer, "chime/avatars");
+        avatarUrl = uploadResult.secure_url;
+      } catch (uploadErr) {
+        console.warn("Cloudinary upload warning on signup:", uploadErr.message);
+        const mime = req.file.mimetype || "image/png";
+        avatarUrl = `data:${mime};base64,${req.file.buffer.toString("base64")}`;
+      }
     } else if (pic && (pic.startsWith("data:") || pic.startsWith("http"))) {
       try {
         const uploadResult = await uploadToCloudinary(pic, "chime/avatars");
         avatarUrl = uploadResult.secure_url;
       } catch (uploadErr) {
-        console.error("Cloudinary upload warning:", uploadErr.message);
+        console.warn("Cloudinary upload warning on signup:", uploadErr.message);
+        avatarUrl = pic;
       }
     }
 
@@ -96,15 +103,35 @@ export const uploadAvatar = async (req, res) => {
       return res.status(400).json({ message: "No image file or image string provided" });
     }
 
-    const uploadResult = await uploadToCloudinary(fileSource, "chime/avatars");
+    let avatarUrl;
+    try {
+      const uploadResult = await uploadToCloudinary(fileSource, "chime/avatars");
+      if (uploadResult && uploadResult.secure_url) {
+        avatarUrl = uploadResult.secure_url;
+      }
+    } catch (cloudErr) {
+      console.warn("Cloudinary upload failed, using direct image data fallback:", cloudErr.message);
+    }
 
-    if (req.user && req.user.id) {
-      await User.findByIdAndUpdate(req.user.id, { pic: uploadResult.secure_url });
+    if (!avatarUrl) {
+      if (typeof fileSource === "string" && (fileSource.startsWith("data:") || fileSource.startsWith("http"))) {
+        avatarUrl = fileSource;
+      } else if (Buffer.isBuffer(fileSource)) {
+        const mime = req.file?.mimetype || "image/png";
+        avatarUrl = `data:${mime};base64,${fileSource.toString("base64")}`;
+      } else {
+        avatarUrl = fileSource;
+      }
+    }
+
+    if (req.user && (req.user.id || req.user._id)) {
+      const userId = req.user.id || req.user._id;
+      await User.findByIdAndUpdate(userId, { pic: avatarUrl }, { new: true });
     }
 
     return res.status(200).json({
       message: "Avatar uploaded successfully",
-      url: uploadResult.secure_url,
+      url: avatarUrl,
     });
   } catch (err) {
     console.error("Upload avatar error:", err);
