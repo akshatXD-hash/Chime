@@ -69,11 +69,11 @@ export const ProfileModal = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="w-full max-w-sm glass-panel rounded-2xl border border-devs-border shadow-card-dark p-6 relative">
-        <div className="flex items-center justify-between pb-4 border-b border-devs-border mb-6">
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <UserIcon className="w-5 h-5 text-devs-blue" />
+    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
+      <div className="w-full max-w-xs bg-devs-surface border border-devs-border/80 rounded-3xl shadow-card-dark p-6 relative">
+        <div className="flex items-center justify-between pb-3.5 border-b border-devs-border/80 mb-5">
+          <h3 className="text-sm font-bold text-white flex items-center gap-2">
+            <UserIcon className="w-4 h-4 text-devs-indigo" />
             <span>Profile Settings</span>
           </h3>
           <button
@@ -81,28 +81,28 @@ export const ProfileModal = ({ isOpen, onClose }) => {
               handleCancelPreview();
               onClose();
             }}
-            className="p-1 rounded-lg text-devs-textMuted hover:text-white hover:bg-devs-hover"
+            className="p-1 rounded-lg text-devs-textMuted hover:text-white hover:bg-devs-hover transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-400 text-center">
+          <div className="mb-4 p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-400 text-center font-medium">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-400 font-semibold text-center flex items-center justify-center gap-2">
-            <Check className="w-4 h-4" /> Profile picture updated successfully!
+          <div className="mb-4 p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-400 font-semibold text-center flex items-center justify-center gap-1.5">
+            <Check className="w-4 h-4" /> Avatar updated!
           </div>
         )}
 
         <div className="flex flex-col items-center text-center space-y-4">
           {/* Avatar with Upload Hover */}
           <div className="relative group">
-            <div className="w-28 h-28 rounded-3xl bg-devs-card border-2 border-devs-border overflow-hidden flex items-center justify-center font-bold text-3xl text-devs-blue shadow-glow-blue">
+            <div className="w-24 h-24 rounded-2xl bg-devs-card border border-devs-border overflow-hidden flex items-center justify-center font-bold text-2xl text-devs-indigo shadow-subtle">
               {preview ? (
                 <img src={preview} alt="New Preview" className="w-full h-full object-cover" />
               ) : user.pic ? (
@@ -111,26 +111,26 @@ export const ProfileModal = ({ isOpen, onClose }) => {
                 user.name?.charAt(0).toUpperCase()
               )}
             </div>
-            <label className="absolute bottom-0 right-0 p-2.5 rounded-2xl bg-devs-blue hover:bg-devs-blueHover text-white cursor-pointer shadow-glow-blue transition-transform hover:scale-105">
-              <Camera className="w-4 h-4" />
+            <label className="absolute -bottom-1 -right-1 p-2 rounded-xl bg-devs-blue hover:bg-devs-blueHover text-white cursor-pointer shadow-subtle transition-transform active:scale-95">
+              <Camera className="w-3.5 h-3.5" />
               <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
             </label>
           </div>
 
           <div>
-            <h2 className="text-xl font-bold text-white">{user.name}</h2>
-            <p className="text-xs text-devs-textMuted flex items-center justify-center gap-1.5 mt-1">
-              <Mail className="w-3.5 h-3.5" /> {user.email}
+            <h2 className="text-base font-bold text-white">{user.name}</h2>
+            <p className="text-xs text-devs-textMuted flex items-center justify-center gap-1.5 mt-0.5">
+              <Mail className="w-3.5 h-3.5 text-devs-textMuted/70" /> {user.email}
             </p>
           </div>
 
           {selectedFile && (
-            <div className="w-full flex items-center gap-2 pt-2">
+            <div className="w-full flex items-center gap-2 pt-1">
               <button
                 type="button"
                 onClick={handleCancelPreview}
                 disabled={uploading}
-                className="flex-1 py-2.5 rounded-xl border border-devs-border text-devs-textSecondary hover:text-white text-xs font-semibold"
+                className="flex-1 py-2 rounded-xl border border-devs-border text-devs-textSecondary hover:text-white text-xs font-semibold"
               >
                 Cancel
               </button>
@@ -138,9 +138,9 @@ export const ProfileModal = ({ isOpen, onClose }) => {
                 type="button"
                 onClick={handleUploadAvatar}
                 disabled={uploading || success}
-                className="flex-1 py-2.5 rounded-xl devs-gradient-btn text-white text-xs font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+                className="flex-1 py-2 rounded-xl bg-devs-blue hover:bg-devs-blueHover text-white text-xs font-semibold flex items-center justify-center gap-1.5 disabled:opacity-50 shadow-subtle"
               >
-                {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Check className="w-4 h-4" /> Save Photo</>}
+                {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <><Check className="w-3.5 h-3.5" /> Save</>}
               </button>
             </div>
           )}
