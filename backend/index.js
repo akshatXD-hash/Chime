@@ -12,7 +12,7 @@ dotenv.config();
 
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 // Allowed origins for CORS
 const allowedOrigins = [
   "http://localhost:5173",

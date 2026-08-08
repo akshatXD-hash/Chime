@@ -40,14 +40,15 @@ export const ProfileModal = ({ isOpen, onClose }) => {
   };
 
   const handleUploadAvatar = async () => {
-    if (!selectedFile) return;
+    if (!selectedFile || !preview) return;
     setUploading(true);
     setError(null);
     setSuccess(false);
     try {
-      const formData = new FormData();
-      formData.append('image', selectedFile);
-      const res = await authApi.uploadAvatar(formData);
+      // Send the base64 data URL directly as JSON — the backend
+      // controller accepts req.body.image as a data URL string and
+      // uploads it to Cloudinary. This avoids multer/FormData issues.
+      const res = await authApi.uploadAvatar({ image: preview });
       if (res && res.url) {
         updateUserPic(res.url);
         setSuccess(true);
