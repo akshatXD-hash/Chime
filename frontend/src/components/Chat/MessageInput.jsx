@@ -51,27 +51,30 @@ export const MessageInput = () => {
   const handleSend = async (e) => {
     e?.preventDefault();
     const messageContent = text.trim();
-    if (!messageContent && !attachmentPreview) return;
+    const attachment = attachmentPreview;
+    if (!messageContent && !attachment) return;
+
+    // Reset input fields immediately so user input box clears upfront
+    setText('');
+    setAttachmentPreview(null);
+    setShowEmoji(false);
+
+    if (socket && selectedChat) {
+      socket.emit('stop-typing', selectedChat._id);
+    }
+    isTypingEmittedRef.current = false;
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
     setSending(true);
     try {
-      if (attachmentPreview) {
-        // Send image preview URL directly as message
-        await sendMessage(attachmentPreview);
-        setAttachmentPreview(null);
-      } else {
+      if (attachment) {
+        await sendMessage(attachment);
+      }
+      if (messageContent) {
         await sendMessage(messageContent);
-        setText('');
       }
-      setShowEmoji(false);
-
-      if (socket && selectedChat) {
-        socket.emit('stop-typing', selectedChat._id);
-      }
-      isTypingEmittedRef.current = false;
-      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     } catch (err) {
-      console.error(err);
+      console.error('Failed to send message:', err);
     } finally {
       setSending(false);
     }
