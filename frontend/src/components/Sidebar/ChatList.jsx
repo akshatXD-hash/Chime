@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useChat } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
-import { Search, UserPlus, Users, MessageSquarePlus, RefreshCw, Users as GroupIcon, ShieldCheck } from 'lucide-react';
+import { Search, Users, MessageSquarePlus, RefreshCw, Users as GroupIcon } from 'lucide-react';
 
 export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
   const { user } = useAuth();
@@ -56,31 +56,31 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
   };
 
   return (
-    <div className="w-full md:w-80 lg:w-96 h-full bg-devs-surface border-r border-devs-border flex flex-col z-10 flex-shrink-0 select-none">
+    <div className="w-full md:w-80 lg:w-96 h-full bg-devs-surface/90 border-r border-devs-border/80 flex flex-col z-10 flex-shrink-0 select-none">
       {/* Header */}
-      <div className="p-4 border-b border-devs-border flex items-center justify-between">
-        <h2 className="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
-          Chats
+      <div className="px-4 py-3.5 border-b border-devs-border/80 flex items-center justify-between">
+        <h2 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
+          Messages
         </h2>
         <div className="flex items-center gap-1">
           <button
             onClick={loadChats}
-            title="Refresh chats"
+            title="Refresh conversation list"
             className="p-2 rounded-xl text-devs-textSecondary hover:text-white hover:bg-devs-hover transition-colors"
           >
-            <RefreshCw className={`w-4 h-4 ${loadingChats ? 'animate-spin text-devs-blue' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${loadingChats ? 'animate-spin text-devs-indigo' : ''}`} />
           </button>
           <button
             onClick={onOpenGroupModal}
-            title="New Group"
+            title="Create Group Chat"
             className="p-2 rounded-xl text-devs-textSecondary hover:text-white hover:bg-devs-hover transition-colors"
           >
             <Users className="w-4 h-4" />
           </button>
           <button
             onClick={onOpenSearchModal}
-            title="New Direct Chat"
-            className="p-2.5 rounded-xl devs-gradient-btn text-white transition-all shadow-glow-blue"
+            title="New Conversation"
+            className="p-2 rounded-xl bg-devs-blue text-white hover:bg-devs-blueHover transition-colors shadow-subtle ml-1"
           >
             <MessageSquarePlus className="w-4 h-4" />
           </button>
@@ -95,13 +95,13 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search chats or messages..."
+            placeholder="Search conversations..."
             className="w-full pl-10 pr-4 py-2 rounded-xl glass-input text-xs"
           />
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex items-center gap-1.5 mt-3">
+        <div className="flex items-center gap-1.5 mt-2.5">
           {[
             { id: 'all', label: 'All' },
             { id: 'unread', label: 'Unread' },
@@ -110,10 +110,10 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
             <button
               key={tab.id}
               onClick={() => setFilterTab(tab.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`px-3 py-1 rounded-full text-[11px] font-medium transition-all ${
                 filterTab === tab.id
-                  ? 'bg-devs-blue text-white shadow-glow-blue'
-                  : 'bg-devs-card text-devs-textSecondary hover:bg-devs-hover hover:text-white border border-devs-border/50'
+                  ? 'bg-devs-blue/20 border border-devs-blue/40 text-devs-indigo font-semibold'
+                  : 'text-devs-textSecondary hover:text-white hover:bg-devs-hover/60 border border-transparent'
               }`}
             >
               {tab.label}
@@ -123,18 +123,18 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
       </div>
 
       {/* Chat List */}
-      <div className="flex-1 overflow-y-auto divide-y divide-devs-border/40">
+      <div className="flex-1 overflow-y-auto divide-y divide-devs-border/30">
         {loadingChats && chats.length === 0 && (
           <div className="p-8 text-center text-xs text-devs-textMuted">Loading conversations...</div>
         )}
 
         {!loadingChats && filteredChats.length === 0 && (
           <div className="p-8 text-center text-xs text-devs-textMuted flex flex-col items-center gap-2">
-            <GroupIcon className="w-8 h-8 text-devs-textMuted/60" />
-            <p>No chats found</p>
+            <GroupIcon className="w-8 h-8 text-devs-textMuted/40" />
+            <p>No conversations found</p>
             <button
               onClick={onOpenSearchModal}
-              className="mt-2 text-devs-blue hover:underline text-xs font-semibold"
+              className="mt-1 text-devs-indigo hover:underline text-xs font-semibold"
             >
               Start a new conversation
             </button>
@@ -151,24 +151,24 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
             <div
               key={chat._id}
               onClick={() => setSelectedChat(chat)}
-              className={`p-3.5 flex items-center justify-between cursor-pointer transition-all ${
+              className={`p-3 flex items-center justify-between cursor-pointer transition-all ${
                 isSelected
-                  ? 'bg-devs-active border-l-4 border-devs-blue'
-                  : 'hover:bg-devs-hover'
+                  ? 'bg-devs-active border-l-2 border-devs-indigo'
+                  : 'hover:bg-devs-hover/70'
               }`}
             >
-              <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
                 {/* Avatar */}
                 <div className="relative flex-shrink-0">
-                  <div className="w-12 h-12 rounded-2xl bg-devs-card border border-devs-border overflow-hidden flex items-center justify-center font-bold text-devs-blue text-lg shadow-sm">
+                  <div className="w-11 h-11 rounded-2xl bg-devs-card border border-devs-border overflow-hidden flex items-center justify-center font-semibold text-devs-indigo text-base shadow-subtle">
                     {details.isGroup ? (
-                      <div className="w-full h-full bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white">
-                        <GroupIcon className="w-6 h-6" />
+                      <div className="w-full h-full bg-gradient-to-br from-indigo-600 to-violet-700 flex items-center justify-center text-white">
+                        <GroupIcon className="w-5 h-5" />
                       </div>
                     ) : details.pic ? (
                       <img src={details.pic} alt={details.name} className="w-full h-full object-cover" />
                     ) : (
-                      details.name.charAt(0).toUpperCase()
+                      details.name?.charAt(0).toUpperCase()
                     )}
                   </div>
                 </div>
@@ -176,23 +176,23 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
                 {/* Info & Last message */}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-white truncate flex items-center gap-1.5">
+                    <h3 className="text-xs font-semibold text-white truncate flex items-center gap-1.5">
                       {details.name}
                       {details.isGroup && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-devs-blue/20 text-devs-cyan">
+                        <span className="text-[10px] px-1.5 py-0.2 rounded bg-devs-indigo/15 text-devs-indigo font-normal">
                           Group
                         </span>
                       )}
                     </h3>
                     {latestMsg && (
-                      <span className="text-[10px] text-devs-textMuted flex-shrink-0">
+                      <span className="text-[10px] text-devs-textMuted flex-shrink-0 ml-2">
                         {formatTimestamp(latestMsg.createdAt || chat.updatedAt)}
                       </span>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between mt-1">
-                    <p className="text-xs text-devs-textSecondary truncate max-w-[180px]">
+                  <div className="flex items-center justify-between mt-0.5">
+                    <p className="text-[11px] text-devs-textSecondary truncate max-w-[180px]">
                       {latestMsg
                         ? `${latestMsg.sender?.name ? latestMsg.sender.name.split(' ')[0] + ': ' : ''}${latestMsg.content}`
                         : details.isGroup
@@ -201,7 +201,7 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
                     </p>
 
                     {unreadCount > 0 && (
-                      <span className="ml-2 w-5 h-5 rounded-full bg-devs-blue text-white text-[10px] font-bold flex items-center justify-center shadow-glow-blue flex-shrink-0">
+                      <span className="ml-2 w-4 h-4 rounded-full bg-devs-blue text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">
                         {unreadCount}
                       </span>
                     )}
