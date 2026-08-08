@@ -68,11 +68,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateUserPic = (newPicUrl) => {
-    if (user) {
-      const updated = { ...user, pic: newPicUrl };
-      setUser(updated);
+    setUser((prevUser) => {
+      if (!prevUser) return null;
+      const updated = { ...prevUser, pic: newPicUrl };
       localStorage.setItem('chime_user', JSON.stringify(updated));
-    }
+      return updated;
+    });
   };
 
   return (
