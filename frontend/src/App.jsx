@@ -57,20 +57,23 @@ const MainLayout = () => {
         ) : (
           /* Empty Chat Selection Screen */
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-devs-bg relative overflow-hidden select-none">
-            <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-devs-blue via-blue-600 to-indigo-600 flex items-center justify-center shadow-glow-blue mb-6">
-              <MessageSquare className="w-10 h-10 text-white" />
+            <div className="absolute inset-0 bg-[radial-gradient(#1F2942_1px,transparent_1px)] [background-size:32px_32px] opacity-20 pointer-events-none" />
+
+            <div className="w-16 h-16 rounded-3xl bg-devs-surface border border-devs-border flex items-center justify-center shadow-card-dark mb-5 text-devs-indigo">
+              <MessageSquare className="w-8 h-8" />
             </div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight mb-2">
+            <h1 className="text-2xl font-bold text-white tracking-tight mb-1.5">
               Welcome to <span className="devs-gradient-text">Chime</span>
             </h1>
-            <p className="text-sm text-devs-textSecondary max-w-md mb-6 leading-relaxed">
-              Send and receive real-time messages, share audio notes, and collaborate with your team instantly.
+            <p className="text-xs text-devs-textSecondary max-w-sm mb-6 leading-relaxed">
+              Select an existing chat from the left panel or start a new conversation to begin messaging in real-time.
             </p>
             <button
               onClick={() => setIsSearchModalOpen(true)}
-              className="px-6 py-3 rounded-xl devs-gradient-btn text-white font-semibold text-sm shadow-glow-blue"
+              className="px-5 py-2.5 rounded-xl bg-devs-blue hover:bg-devs-blueHover text-white font-semibold text-xs transition-colors shadow-subtle flex items-center gap-2"
             >
-              Start New Conversation
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span>Start New Conversation</span>
             </button>
           </div>
         )}
