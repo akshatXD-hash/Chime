@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Mail, Lock, User as UserIcon, Camera, Eye, EyeOff, MessageSquare, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
+import { Mail, Lock, User as UserIcon, Camera, Eye, EyeOff, MessageCircle, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 
 export const Register = ({ onSwitchToLogin }) => {
   const { signup } = useAuth();
@@ -54,43 +54,43 @@ export const Register = ({ onSwitchToLogin }) => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-devs-bg flex items-center justify-center p-4 relative overflow-hidden">
-      <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-devs-blue/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-devs-indigo/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen w-full bg-devs-bg flex items-center justify-center p-4 relative selection:bg-devs-blue selection:text-white">
+      {/* Subtle radial geometric grid background */}
+      <div className="absolute inset-0 bg-[radial-gradient(#1F2942_1px,transparent_1px)] [background-size:32px_32px] opacity-25 pointer-events-none" />
 
-      <div className="w-full max-w-md glass-panel p-8 rounded-2xl shadow-card-dark relative z-10 border border-devs-border my-6">
+      <div className="w-full max-w-md bg-devs-surface/90 backdrop-blur-xl p-8 rounded-3xl shadow-card-dark relative z-10 border border-devs-border/80 my-6">
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-devs-blue via-blue-600 to-indigo-600 flex items-center justify-center shadow-glow-blue mb-3">
-            <MessageSquare className="w-8 h-8 text-white" />
+          <div className="w-12 h-12 rounded-2xl bg-devs-blue/10 border border-devs-blue/30 flex items-center justify-center text-devs-indigo mb-3">
+            <MessageCircle className="w-6 h-6" />
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white mb-1">
+          <h1 className="text-2xl font-bold tracking-tight text-white mb-1">
             Join <span className="devs-gradient-text">Chime</span>
           </h1>
-          <p className="text-sm text-devs-textSecondary">
-            Create your account to start chatting with your network
+          <p className="text-xs text-devs-textSecondary">
+            Create an account to start chatting with your network
           </p>
         </div>
 
         {error && (
-          <div className="mb-5 p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-3 text-red-400 text-sm">
-            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <div className="mb-5 p-3 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center gap-3 text-red-400 text-xs font-medium">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3.5">
           {/* Avatar Upload */}
-          <div className="flex flex-col items-center mb-2">
+          <div className="flex flex-col items-center mb-1">
             <div className="relative group">
-              <div className="w-20 h-20 rounded-full bg-devs-card border-2 border-devs-border overflow-hidden flex items-center justify-center shadow-md">
+              <div className="w-20 h-20 rounded-2xl bg-devs-card border border-devs-border overflow-hidden flex items-center justify-center shadow-subtle">
                 {avatarPreview ? (
                   <img src={avatarPreview} alt="Avatar Preview" className="w-full h-full object-cover" />
                 ) : (
-                  <UserIcon className="w-10 h-10 text-devs-textMuted" />
+                  <UserIcon className="w-8 h-8 text-devs-textMuted" />
                 )}
               </div>
-              <label className="absolute bottom-0 right-0 p-2 rounded-full bg-devs-blue hover:bg-devs-blueHover text-white cursor-pointer shadow-glow-blue transition-transform hover:scale-105">
-                <Camera className="w-4 h-4" />
+              <label className="absolute bottom-0 right-0 p-2 rounded-xl bg-devs-blue text-white cursor-pointer hover:bg-devs-blueHover transition-transform hover:scale-105 shadow-sm">
+                <Camera className="w-3.5 h-3.5" />
                 <input
                   type="file"
                   accept="image/*"
@@ -99,55 +99,55 @@ export const Register = ({ onSwitchToLogin }) => {
                 />
               </label>
             </div>
-            <span className="text-xs text-devs-textMuted mt-2">Upload Profile Photo (Optional)</span>
+            <span className="text-[11px] text-devs-textMuted mt-1.5 font-medium">Upload photo (optional)</span>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-devs-textSecondary uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] font-semibold text-devs-textSecondary uppercase tracking-wider mb-1">
               Full Name
             </label>
             <div className="relative">
-              <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-devs-textMuted" />
+              <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-devs-textMuted" />
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="John Doe"
-                className="w-full pl-11 pr-4 py-3 rounded-xl glass-input text-sm"
+                placeholder="Jane Doe"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl glass-input text-xs"
                 required
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-devs-textSecondary uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] font-semibold text-devs-textSecondary uppercase tracking-wider mb-1">
               Email Address
             </label>
             <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-devs-textMuted" />
+              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-devs-textMuted" />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full pl-11 pr-4 py-3 rounded-xl glass-input text-sm"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl glass-input text-xs"
                 required
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-devs-textSecondary uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] font-semibold text-devs-textSecondary uppercase tracking-wider mb-1">
               Password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-devs-textMuted" />
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-devs-textMuted" />
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="At least 6 characters"
-                className="w-full pl-11 pr-11 py-3 rounded-xl glass-input text-sm"
+                className="w-full pl-10 pr-10 py-2.5 rounded-xl glass-input text-xs"
                 required
                 minLength={6}
               />
@@ -156,7 +156,7 @@ export const Register = ({ onSwitchToLogin }) => {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3.5 top-1/2 -translate-y-1/2 text-devs-textMuted hover:text-white transition-colors"
               >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
@@ -164,25 +164,25 @@ export const Register = ({ onSwitchToLogin }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 px-4 rounded-xl devs-gradient-btn text-white font-semibold text-sm flex items-center justify-center gap-2 group disabled:opacity-50 mt-2"
+            className="w-full py-3 px-4 rounded-xl devs-gradient-btn text-white font-semibold text-xs flex items-center justify-center gap-2 group disabled:opacity-50 mt-3"
           >
             {loading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <>
                 <span>Create Account</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </>
             )}
           </button>
         </form>
 
-        <div className="mt-6 pt-5 border-t border-devs-border text-center">
-          <p className="text-sm text-devs-textSecondary">
+        <div className="mt-6 pt-5 border-t border-devs-border/60 text-center">
+          <p className="text-xs text-devs-textSecondary">
             Already have an account?{' '}
             <button
               onClick={onSwitchToLogin}
-              className="text-devs-blue hover:text-devs-cyan font-semibold transition-colors"
+              className="text-devs-indigo hover:text-devs-violet font-semibold transition-colors ml-0.5"
             >
               Sign In
             </button>
