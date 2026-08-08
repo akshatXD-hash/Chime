@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useChat } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
 import { MessageBubble } from './MessageBubble';
-import { MessageSquare, X } from 'lucide-react';
+import { MessageCircle, X } from 'lucide-react';
 
 export const MessageList = () => {
   const { user } = useAuth();
@@ -38,9 +38,9 @@ export const MessageList = () => {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-devs-bg relative selection:bg-devs-blue selection:text-white">
-      {/* Background Subtle Grid Pattern */}
-      <div className="absolute inset-0 bg-[radial-gradient(#202B42_1px,transparent_1px)] [background-size:24px_24px] opacity-20 pointer-events-none" />
+    <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-devs-bg relative selection:bg-devs-blue selection:text-white">
+      {/* Background Radial Dots */}
+      <div className="absolute inset-0 bg-[radial-gradient(#1F2942_1px,transparent_1px)] [background-size:28px_28px] opacity-20 pointer-events-none" />
 
       {loadingMessages && (
         <div className="flex items-center justify-center h-full text-xs text-devs-textMuted">
@@ -50,12 +50,12 @@ export const MessageList = () => {
 
       {!loadingMessages && messages.length === 0 && (
         <div className="flex flex-col items-center justify-center h-full text-devs-textMuted space-y-2 select-none">
-          <div className="w-12 h-12 rounded-2xl bg-devs-card border border-devs-border flex items-center justify-center text-devs-blue shadow-glow-blue mb-2">
-            <MessageSquare className="w-6 h-6" />
+          <div className="w-12 h-12 rounded-2xl bg-devs-card border border-devs-border flex items-center justify-center text-devs-indigo shadow-subtle mb-1">
+            <MessageCircle className="w-6 h-6" />
           </div>
           <p className="text-sm font-semibold text-white">No messages here yet</p>
-          <p className="text-xs text-devs-textMuted max-w-xs text-center">
-            Say hi to start the conversation! Your messages are encrypted & real-time.
+          <p className="text-xs text-devs-textMuted max-w-xs text-center leading-relaxed">
+            Send a message to kick off the conversation! All messages are delivered in real time.
           </p>
         </div>
       )}
@@ -74,7 +74,7 @@ export const MessageList = () => {
           <React.Fragment key={message._id || index}>
             {showDateDivider && (
               <div className="flex items-center justify-center my-4">
-                <span className="px-3 py-1 rounded-full bg-devs-card border border-devs-border text-[11px] font-semibold text-devs-textSecondary shadow-sm">
+                <span className="px-3 py-0.5 rounded-full bg-devs-card/90 border border-devs-border/60 text-[10px] font-medium text-devs-textSecondary shadow-subtle">
                   {currentDateLabel}
                 </span>
               </div>
@@ -90,15 +90,15 @@ export const MessageList = () => {
         );
       })}
 
-      {/* Typing Indicator */}
+      {/* Modern Typing Indicator */}
       {isTyping && (
-        <div className="flex items-center gap-2 text-devs-textMuted text-xs mb-2 ml-2 animate-fade-in">
-          <div className="px-3 py-2 rounded-xl bg-devs-card border border-devs-border flex items-center gap-1.5 shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-devs-cyan animate-bounce" style={{ animationDelay: '0ms' }} />
-            <span className="w-2 h-2 rounded-full bg-devs-cyan animate-bounce" style={{ animationDelay: '150ms' }} />
-            <span className="w-2 h-2 rounded-full bg-devs-cyan animate-bounce" style={{ animationDelay: '300ms' }} />
+        <div className="flex items-center gap-2 mb-2 ml-1">
+          <div className="px-3.5 py-2.5 rounded-2xl bg-devs-card border border-devs-border/70 flex items-center gap-1 shadow-subtle rounded-tl-xs">
+            <span className="w-1.5 h-1.5 rounded-full bg-devs-cyan typing-dot" />
+            <span className="w-1.5 h-1.5 rounded-full bg-devs-cyan typing-dot" />
+            <span className="w-1.5 h-1.5 rounded-full bg-devs-cyan typing-dot" />
           </div>
-          <span className="text-[11px] text-devs-cyan">typing...</span>
+          <span className="text-[10px] text-devs-cyan font-medium tracking-wide">typing</span>
         </div>
       )}
 
@@ -112,9 +112,9 @@ export const MessageList = () => {
         >
           <button
             onClick={() => setLightboxImage(null)}
-            className="absolute top-4 right-4 p-2 rounded-full bg-devs-card text-white hover:bg-devs-hover"
+            className="absolute top-4 right-4 p-2 rounded-xl bg-devs-card text-white hover:bg-devs-hover border border-devs-border"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </button>
           <img
             src={lightboxImage}
