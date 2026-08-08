@@ -8,12 +8,21 @@ export const ProfileModal = ({ isOpen, onClose }) => {
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   if (!isOpen || !user) return null;
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
+    setError(null);
+    setSuccess(false);
+
     if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image file size must be less than 5MB');
+        return;
+      }
       setSelectedFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -23,19 +32,37 @@ export const ProfileModal = ({ isOpen, onClose }) => {
     }
   };
 
+  const handleCancelPreview = () => {
+    setSelectedFile(null);
+    setPreview(null);
+    setError(null);
+    setSuccess(false);
+  };
+
   const handleUploadAvatar = async () => {
     if (!selectedFile) return;
     setUploading(true);
+    setError(null);
+    setSuccess(false);
     try {
       const formData = new FormData();
       formData.append('image', selectedFile);
       const res = await authApi.uploadAvatar(formData);
-      updateUserPic(res.url);
-      setPreview(null);
-      setSelectedFile(null);
-      onClose();
+      if (res && res.url) {
+        updateUserPic(res.url);
+        setSuccess(true);
+        setTimeout(() => {
+          setPreview(null);
+          setSelectedFile(null);
+          setSuccess(false);
+          onClose();
+        }, 1000);
+      } else {
+        throw new Error('Failed to obtain uploaded image URL');
+      }
     } catch (err) {
-      console.error(err);
+      console.error('Avatar upload error:', err);
+      setError(err.message || 'Failed to upload image. Please try again.');
     } finally {
       setUploading(false);
     }
@@ -46,16 +73,31 @@ export const ProfileModal = ({ isOpen, onClose }) => {
       <div className="w-full max-w-sm glass-panel rounded-2xl border border-devs-border shadow-card-dark p-6 relative">
         <div className="flex items-center justify-between pb-4 border-b border-devs-border mb-6">
           <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-devs-blue" />
+            <UserIcon className="w-5 h-5 text-devs-blue" />
             <span>Profile Settings</span>
           </h3>
           <button
-            onClick={onClose}
+            onClick={() => {
+              handleCancelPreview();
+              onClose();
+            }}
             className="p-1 rounded-lg text-devs-textMuted hover:text-white hover:bg-devs-hover"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {error && (
+          <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-400 text-center">
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-400 font-semibold text-center flex items-center justify-center gap-2">
+            <Check className="w-4 h-4" /> Profile picture updated successfully!
+          </div>
+        )}
 
         <div className="flex flex-col items-center text-center space-y-4">
           {/* Avatar with Upload Hover */}
@@ -66,7 +108,7 @@ export const ProfileModal = ({ isOpen, onClose }) => {
               ) : user.pic ? (
                 <img src={user.pic} alt={user.name} className="w-full h-full object-cover" />
               ) : (
-                user.name.charAt(0).toUpperCase()
+                user.name?.charAt(0).toUpperCase()
               )}
             </div>
             <label className="absolute bottom-0 right-0 p-2.5 rounded-2xl bg-devs-blue hover:bg-devs-blueHover text-white cursor-pointer shadow-glow-blue transition-transform hover:scale-105">
@@ -83,13 +125,24 @@ export const ProfileModal = ({ isOpen, onClose }) => {
           </div>
 
           {selectedFile && (
-            <button
-              onClick={handleUploadAvatar}
-              disabled={uploading}
-              className="w-full py-2.5 rounded-xl devs-gradient-btn text-white text-xs font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Check className="w-4 h-4" /> Save New Avatar</>}
-            </button>
+            <div className="w-full flex items-center gap-2 pt-2">
+              <button
+                type="button"
+                onClick={handleCancelPreview}
+                disabled={uploading}
+                className="flex-1 py-2.5 rounded-xl border border-devs-border text-devs-textSecondary hover:text-white text-xs font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleUploadAvatar}
+                disabled={uploading || success}
+                className="flex-1 py-2.5 rounded-xl devs-gradient-btn text-white text-xs font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Check className="w-4 h-4" /> Save Photo</>}
+              </button>
+            </div>
           )}
         </div>
       </div>
