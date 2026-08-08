@@ -14,7 +14,7 @@ export const MessageBubble = ({ message, isOutgoing, showSenderName, onImageClic
   const isAudioUrl = message.content?.match(/\.(mp3|wav|ogg|m4a)($|\?)/i) || message.content?.startsWith('data:audio/');
 
   return (
-    <div className={`flex flex-col mb-2.5 max-w-[85%] sm:max-w-[75%] md:max-w-[65%] ${isOutgoing ? 'ml-auto items-end' : 'mr-auto items-start'}`}>
+    <div className={`flex flex-col mb-2.5 max-w-[88%] sm:max-w-[78%] md:max-w-[65%] ${isOutgoing ? 'ml-auto items-end' : 'mr-auto items-start'}`}>
       {/* Sender Name for Group Chats */}
       {!isOutgoing && showSenderName && message.sender?.name && (
         <span className="text-[10px] font-semibold text-devs-indigo mb-1 ml-2 tracking-wide">
