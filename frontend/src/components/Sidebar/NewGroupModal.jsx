@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { userApi } from '../../api/userApi';
-import { useChat } from '../../context/ChatContext';
+import { useChat, areIdsEqual } from '../../context/ChatContext';
 import { Users, X, Search, Check, Loader2 } from 'lucide-react';
 
 export const NewGroupModal = ({ isOpen, onClose }) => {
@@ -12,29 +12,49 @@ export const NewGroupModal = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState(null);
+  const debounceRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setGroupName('');
+      setSearchQuery('');
+      setSearchResults([]);
+      setSelectedUsers([]);
+      setError(null);
+    }
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const handleSearch = async (query) => {
+  const handleSearch = (query) => {
     setSearchQuery(query);
+    setError(null);
     if (!query.trim()) {
       setSearchResults([]);
       return;
     }
-    setLoading(true);
-    try {
-      const results = await userApi.searchUsers(query);
-      setSearchResults(results);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const results = await userApi.searchUsers(query);
+        setSearchResults(Array.isArray(results) ? results : []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }, 250);
   };
 
   const toggleSelectUser = (userItem) => {
-    if (selectedUsers.some((u) => u._id === userItem._id)) {
-      setSelectedUsers(selectedUsers.filter((u) => u._id !== userItem._id));
+    setError(null);
+    if (selectedUsers.some((u) => areIdsEqual(u._id, userItem._id))) {
+      setSelectedUsers(selectedUsers.filter((u) => !areIdsEqual(u._id, userItem._id)));
     } else {
       setSelectedUsers([...selectedUsers, userItem]);
     }
@@ -54,7 +74,7 @@ export const NewGroupModal = ({ isOpen, onClose }) => {
     setError(null);
     try {
       const userIds = selectedUsers.map((u) => u._id);
-      await createGroupChat(groupName, userIds);
+      await createGroupChat(groupName.trim(), userIds);
       onClose();
     } catch (err) {
       setError(err.message || 'Failed to create group');
@@ -64,8 +84,8 @@ export const NewGroupModal = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="w-full max-w-md bg-devs-surface border-t sm:border border-devs-border/80 rounded-t-3xl sm:rounded-3xl shadow-card-dark p-5 sm:p-6 overflow-hidden relative animate-in fade-in slide-in-from-bottom-5 sm:zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-150">
+      <div className="w-full max-w-md bg-devs-surface border-t sm:border border-devs-border/80 rounded-t-3xl sm:rounded-3xl shadow-card-dark p-5 sm:p-6 overflow-hidden relative animate-in slide-in-from-bottom-5 sm:zoom-in-95 duration-200">
         <div className="flex items-center justify-between pb-3.5 border-b border-devs-border/80 mb-4">
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-devs-indigo" />
@@ -94,8 +114,11 @@ export const NewGroupModal = ({ isOpen, onClose }) => {
             <input
               type="text"
               value={groupName}
-              onChange={(e) => setGroupName(e.target.value)}
-              placeholder="e.g. Frontend Engineers"
+              onChange={(e) => {
+                setGroupName(e.target.value);
+                setError(null);
+              }}
+              placeholder="e.g. Engineering Team"
               className="w-full px-3.5 py-2.5 rounded-xl glass-input text-xs"
             />
           </div>
@@ -148,7 +171,7 @@ export const NewGroupModal = ({ isOpen, onClose }) => {
           {/* Search Results */}
           <div className="max-h-40 overflow-y-auto space-y-1 pr-1">
             {searchResults.map((userItem) => {
-              const isSelected = selectedUsers.some((u) => u._id === userItem._id);
+              const isSelected = selectedUsers.some((u) => areIdsEqual(u._id, userItem._id));
               return (
                 <div
                   key={userItem._id}
@@ -160,19 +183,19 @@ export const NewGroupModal = ({ isOpen, onClose }) => {
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-xl bg-devs-card border border-devs-border overflow-hidden flex items-center justify-center font-bold text-xs text-devs-indigo">
+                    <div className="w-7 h-7 rounded-xl bg-devs-card border border-devs-border overflow-hidden flex items-center justify-center font-bold text-xs text-devs-indigo flex-shrink-0">
                       {userItem.pic ? (
                         <img src={userItem.pic} alt={userItem.name} className="w-full h-full object-cover" />
                       ) : (
-                        userItem.name?.charAt(0).toUpperCase()
+                        (userItem.name || 'U').charAt(0).toUpperCase()
                       )}
                     </div>
-                    <div>
-                      <h4 className="text-xs font-semibold text-white">{userItem.name}</h4>
-                      <p className="text-[10px] text-devs-textMuted">{userItem.email}</p>
+                    <div className="min-w-0">
+                      <h4 className="text-xs font-semibold text-white truncate">{userItem.name}</h4>
+                      <p className="text-[10px] text-devs-textMuted truncate">{userItem.email}</p>
                     </div>
                   </div>
-                  {isSelected && <Check className="w-3.5 h-3.5 text-devs-indigo" />}
+                  {isSelected && <Check className="w-3.5 h-3.5 text-devs-indigo flex-shrink-0" />}
                 </div>
               );
             })}
@@ -190,3 +213,4 @@ export const NewGroupModal = ({ isOpen, onClose }) => {
     </div>
   );
 };
+
