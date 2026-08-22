@@ -5,7 +5,9 @@ import { useSocket } from '../../context/SocketContext';
 
 export const NavRail = ({ activeTab, setActiveTab, onOpenProfile, onOpenSettings }) => {
   const { user, logout } = useAuth();
-  const { socketConnected } = useSocket();
+  const { socketConnected, connectionStatus } = useSocket();
+
+  const isConnected = socketConnected || connectionStatus === 'connected';
 
   return (
     <div className="w-full md:w-16 lg:w-20 h-14 md:h-full bg-devs-surface/95 border-t md:border-t-0 md:border-r border-devs-border/80 flex flex-row md:flex-col items-center justify-between px-4 py-2 md:px-0 md:py-5 select-none z-30 flex-shrink-0 order-last md:order-first">
@@ -36,16 +38,16 @@ export const NavRail = ({ activeTab, setActiveTab, onOpenProfile, onOpenSettings
           className="relative w-9 h-9 md:w-10 md:h-10 rounded-2xl border border-devs-border hover:border-devs-blue/60 transition-all overflow-hidden flex items-center justify-center bg-devs-card shadow-subtle group"
         >
           {user?.pic ? (
-            <img src={user.pic} alt={user.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+            <img src={user.pic} alt={user.name || 'Profile'} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
           ) : (
             <UserIcon className="w-4 h-4 text-devs-textSecondary" />
           )}
           {/* Real-time status dot */}
           <span
             className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-devs-surface ${
-              socketConnected ? 'bg-emerald-500' : 'bg-amber-500'
+              isConnected ? 'bg-emerald-500' : 'bg-amber-500'
             }`}
-            title={socketConnected ? 'Real-time Connected' : 'Connecting to Socket...'}
+            title={isConnected ? 'Real-time Connected' : 'Connecting to Socket...'}
           />
         </button>
 
@@ -60,3 +62,4 @@ export const NavRail = ({ activeTab, setActiveTab, onOpenProfile, onOpenSettings
     </div>
   );
 };
+
