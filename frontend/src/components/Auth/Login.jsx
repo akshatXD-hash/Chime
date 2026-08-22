@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Mail, Lock, Eye, EyeOff, MessageCircle, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 
 export const Login = ({ onSwitchToRegister }) => {
-  const { login } = useAuth();
+  const { login, authNotice } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -46,6 +46,13 @@ export const Login = ({ onSwitchToRegister }) => {
             Sign in to access your conversations and team messages
           </p>
         </div>
+
+        {authNotice && (
+          <div className="mb-6 p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center gap-3 text-amber-300 text-xs font-medium">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 text-amber-400" />
+            <span>{authNotice}</span>
+          </div>
+        )}
 
         {error && (
           <div className="mb-6 p-3.5 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center gap-3 text-red-400 text-xs font-medium">
