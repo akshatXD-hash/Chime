@@ -102,20 +102,20 @@ io.on("connection", (socket) => {
     if (!chat) return;
 
     const senderId = (sender?._id || sender)?.toString();
-    const chatId = (chat?._id || chat)?.toString();
 
-    // 1. Emit to the specific chat room
-    if (chatId) {
-      socket.to(chatId).emit("receive-message", message);
-    }
-
-    // 2. Emit directly to each user's personal room in the chat
+    // Emit directly to each recipient's personal room in the chat
     if (chat.users && Array.isArray(chat.users)) {
       chat.users.forEach((userItem) => {
         const userId = (userItem?._id || userItem)?.toString();
         if (!userId || userId === senderId) return;
         socket.to(userId).emit("receive-message", message);
       });
+    } else {
+      // Fallback: emit to chat room if users array is not populated
+      const chatId = (chat?._id || chat)?.toString();
+      if (chatId) {
+        socket.to(chatId).emit("receive-message", message);
+      }
     }
   });
 
