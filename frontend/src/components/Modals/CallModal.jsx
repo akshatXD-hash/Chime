@@ -9,6 +9,8 @@ export const CallModal = ({ isOpen, callType, contactName, contactPic, onClose }
   useEffect(() => {
     if (!isOpen) {
       setDuration(0);
+      setIsMuted(false);
+      setIsVideoOff(false);
       return;
     }
     const timer = setInterval(() => setDuration((prev) => prev + 1), 1000);
