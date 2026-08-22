@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 
@@ -10,7 +10,13 @@ export const SocketProvider = ({ children }) => {
   const { user } = useAuth();
   const [socket, setSocket] = useState(null);
   const [socketConnected, setSocketConnected] = useState(false);
-  const [onlineUsers, setOnlineUsers] = useState({});
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  const [connectionStatus, setConnectionStatus] = useState('disconnected'); // 'connecting' | 'connected' | 'disconnected'
+  const userRef = useRef(user);
+
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
 
   useEffect(() => {
     if (!user) {
@@ -18,40 +24,67 @@ export const SocketProvider = ({ children }) => {
         socket.disconnect();
         setSocket(null);
         setSocketConnected(false);
+        setConnectionStatus('disconnected');
       }
       return;
     }
 
+    setConnectionStatus('connecting');
+
     const newSocket = io(SOCKET_URL, {
-      reconnectionAttempts: 5,
+      reconnectionAttempts: 10,
       reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      timeout: 20000,
       transports: ['websocket', 'polling'],
     });
 
     newSocket.on('connect', () => {
       console.log('Socket connected:', newSocket.id);
       setSocketConnected(true);
-      newSocket.emit('setup', user);
+      setConnectionStatus('connected');
+      if (userRef.current) {
+        newSocket.emit('setup', userRef.current);
+      }
+    });
+
+    newSocket.io.on('reconnect_attempt', () => {
+      setConnectionStatus('connecting');
     });
 
     newSocket.io.on('reconnect', () => {
       console.log('Socket reconnected');
       setSocketConnected(true);
-      newSocket.emit('setup', user);
+      setConnectionStatus('connected');
+      if (userRef.current) {
+        newSocket.emit('setup', userRef.current);
+      }
     });
 
     newSocket.on('connected', () => {
       setSocketConnected(true);
+      setConnectionStatus('connected');
     });
 
     newSocket.on('get-online-users', (users) => {
-      setOnlineUsers(Array.isArray(users) ? users : []);
+      if (Array.isArray(users)) {
+        setOnlineUsers(users.map(String));
+      } else if (users && typeof users === 'object') {
+        setOnlineUsers(Object.keys(users));
+      } else {
+        setOnlineUsers([]);
+      }
     });
 
-    newSocket.on('disconnect', () => {
-      console.log('Socket disconnected');
+    newSocket.on('disconnect', (reason) => {
+      console.log('Socket disconnected:', reason);
       setSocketConnected(false);
-      setOnlineUsers([]);
+      setConnectionStatus('disconnected');
+    });
+
+    newSocket.on('connect_error', (err) => {
+      console.warn('Socket connection error:', err.message);
+      setConnectionStatus('disconnected');
     });
 
     setSocket(newSocket);
@@ -64,20 +97,22 @@ export const SocketProvider = ({ children }) => {
   // Audio notification generator using Web Audio API
   const playNotificationSound = () => {
     try {
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtxClass) return;
+      const audioCtx = new AudioCtxClass();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.type = 'sine';
       osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
-      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15); // A5
-      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.12); // A5
+      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.22);
       osc.connect(gain);
       gain.connect(audioCtx.destination);
       osc.start();
-      osc.stop(audioCtx.currentTime + 0.25);
-    } catch (e) {
-      console.log('Audio error:', e);
+      osc.stop(audioCtx.currentTime + 0.22);
+    } catch {
+      // Ignore autoplay/audio errors on restricted browsers
     }
   };
 
@@ -86,6 +121,7 @@ export const SocketProvider = ({ children }) => {
       value={{
         socket,
         socketConnected,
+        connectionStatus,
         onlineUsers,
         playNotificationSound,
       }}
@@ -102,3 +138,4 @@ export const useSocket = () => {
   }
   return context;
 };
+
