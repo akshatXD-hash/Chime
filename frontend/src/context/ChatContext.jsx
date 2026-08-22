@@ -1,50 +1,138 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { chatApi } from '../api/chatApi';
 import { messageApi } from '../api/messageApi';
 import { useAuth } from './AuthContext';
 import { useSocket } from './SocketContext';
+import { areIdsEqual } from '../utils/chatUtils';
 
 const ChatContext = createContext(null);
 
+export { areIdsEqual };
+
 export const ChatProvider = ({ children }) => {
+
   const { user } = useAuth();
   const { socket, playNotificationSound } = useSocket();
 
-  const [chats, setChats] = useState([]);
+  const userId = user?._id || user?.id;
+
+  // Hydrate chats from localStorage cache for instant display without blank screen
+  const [chats, setChats] = useState(() => {
+    if (!userId) return [];
+    try {
+      const cached = localStorage.getItem(`chime_chats_${userId}`);
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
+
   const [selectedChat, setSelectedChat] = useState(null);
   const [messages, setMessages] = useState([]);
   const [loadingChats, setLoadingChats] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const [fetchError, setFetchError] = useState(null);
   const [typingMap, setTypingMap] = useState({});
   const [unreadMap, setUnreadMap] = useState({});
 
-  // Safety timeout refs for typing indicator — auto-clears if stop-typing is never received
+  // Safety timeout refs for typing indicators
   const typingTimeoutMapRef = useRef({});
   const prevSelectedChatIdRef = useRef(null);
+  const selectedChatRef = useRef(selectedChat);
+  const processedMessageIdsRef = useRef(new Set());
 
-  // Fetch chats on user login
-  const loadChats = async () => {
-    if (!user) return;
+  useEffect(() => {
+    selectedChatRef.current = selectedChat;
+  }, [selectedChat]);
+
+  // Persist chats cache whenever chats change
+  useEffect(() => {
+    if (userId && chats.length > 0) {
+      try {
+        localStorage.setItem(`chime_chats_${userId}`, JSON.stringify(chats));
+      } catch (err) {
+        console.warn('Failed to cache chats in localStorage:', err);
+      }
+    }
+  }, [chats, userId]);
+
+  // Persist / restore active selected chat
+  useEffect(() => {
+    if (!userId) return;
+    if (selectedChat?._id) {
+      localStorage.setItem(`chime_active_chat_${userId}`, String(selectedChat._id));
+    }
+  }, [selectedChat?._id, userId]);
+
+  // Fetch chats from server
+  const loadChats = useCallback(async () => {
+    if (!userId) return;
     setLoadingChats(true);
+    setFetchError(null);
     try {
       const data = await chatApi.fetchChats();
-      setChats(data);
+      const chatList = Array.isArray(data) ? data : [];
+      setChats(chatList);
+      setFetchError(null);
+
+      if (userId) {
+        try {
+          localStorage.setItem(`chime_chats_${userId}`, JSON.stringify(chatList));
+        } catch {
+          // ignore storage error
+        }
+      }
+
+      // Check if we can restore the active chat if none currently selected
+      if (!selectedChatRef.current && userId) {
+        const savedChatId = localStorage.getItem(`chime_active_chat_${userId}`);
+        if (savedChatId) {
+          const matchingChat = chatList.find((c) => areIdsEqual(c._id, savedChatId));
+          if (matchingChat) {
+            setSelectedChat(matchingChat);
+          }
+        }
+      }
     } catch (err) {
-      console.error('Error fetching chats:', err.message);
+      console.warn('Warning fetching chats from server:', err.message);
+      setFetchError(err.message || 'Unable to sync conversations');
+      // Keep existing cached chats in state! Do not wipe state on error!
     } finally {
       setLoadingChats(false);
     }
-  };
+  }, [userId]);
 
+  // On user change / mount: hydrate cache and trigger loadChats
   useEffect(() => {
-    if (user) {
+    if (userId) {
+      // 1. Immediately hydrate from cache
+      try {
+        const cached = localStorage.getItem(`chime_chats_${userId}`);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setChats(parsed);
+            const savedChatId = localStorage.getItem(`chime_active_chat_${userId}`);
+            if (savedChatId) {
+              const matched = parsed.find((c) => areIdsEqual(c._id, savedChatId));
+              if (matched) {
+                setSelectedChat(matched);
+              }
+            }
+          }
+        }
+      } catch {
+        // ignore cache parse error
+      }
+      // 2. Fetch fresh data from backend
       loadChats();
     } else {
       setChats([]);
       setSelectedChat(null);
       setMessages([]);
+      setFetchError(null);
     }
-  }, [user]);
+  }, [userId, loadChats]);
 
   // Join socket chat room immediately when selectedChat or socket changes
   useEffect(() => {
@@ -59,9 +147,7 @@ export const ChatProvider = ({ children }) => {
     const newId = selectedChat?._id;
 
     if (prevId && prevId !== newId) {
-      // Clear typing for the chat we just left
       setTypingMap((prev) => ({ ...prev, [prevId]: false }));
-      // Clear any safety timeout for the old chat
       if (typingTimeoutMapRef.current[prevId]) {
         clearTimeout(typingTimeoutMapRef.current[prevId]);
         delete typingTimeoutMapRef.current[prevId];
@@ -81,8 +167,7 @@ export const ChatProvider = ({ children }) => {
       setLoadingMessages(true);
       try {
         const data = await messageApi.getMessages(selectedChat._id);
-        setMessages(data);
-
+        setMessages(Array.isArray(data) ? data : []);
         setUnreadMap((prev) => ({ ...prev, [selectedChat._id]: 0 }));
       } catch (err) {
         console.error('Error fetching messages:', err.message);
@@ -94,11 +179,6 @@ export const ChatProvider = ({ children }) => {
     loadMessages();
   }, [selectedChat?._id]);
 
-  const selectedChatRef = useRef(selectedChat);
-  useEffect(() => {
-    selectedChatRef.current = selectedChat;
-  }, [selectedChat]);
-
   // Cleanup all typing timeouts on unmount
   useEffect(() => {
     return () => {
@@ -107,45 +187,67 @@ export const ChatProvider = ({ children }) => {
     };
   }, []);
 
+  // Real-time socket events with deduplication
   useEffect(() => {
     if (!socket) return;
 
     const handleReceiveMessage = (newMessage) => {
       if (!newMessage || !newMessage.chat) return;
 
+      const messageId = newMessage._id;
+      if (messageId) {
+        if (processedMessageIdsRef.current.has(messageId)) {
+          return; // Already processed this message (prevents double sound / double counter)
+        }
+        processedMessageIdsRef.current.add(messageId);
+        // Keep set size bounded
+        if (processedMessageIdsRef.current.size > 200) {
+          const firstKey = processedMessageIdsRef.current.values().next().value;
+          processedMessageIdsRef.current.delete(firstKey);
+        }
+      }
+
       const chatOfMessage = newMessage.chat;
       const chatId = typeof chatOfMessage === 'object' ? chatOfMessage._id : chatOfMessage;
-
-      playNotificationSound();
-
       const activeChatId = selectedChatRef.current?._id;
 
-      if (activeChatId && activeChatId === chatId) {
+      // Play sound for incoming messages
+      playNotificationSound();
+
+      // If this message belongs to the currently active chat
+      if (activeChatId && areIdsEqual(activeChatId, chatId)) {
         setMessages((prev) => {
-          if (prev.some((m) => m._id === newMessage._id)) return prev;
+          if (prev.some((m) => areIdsEqual(m._id, newMessage._id))) return prev;
           return [...prev, newMessage];
         });
       } else {
+        // Increment unread count for other chats
         setUnreadMap((prev) => ({
           ...prev,
           [chatId]: (prev[chatId] || 0) + 1,
         }));
       }
 
+      // Update chats list (move chat to top and update latestMessage)
       setChats((prevChats) => {
-        const chatExists = prevChats.some((c) => c._id === chatId);
+        const chatExists = prevChats.some((c) => areIdsEqual(c._id, chatId));
         if (!chatExists) {
+          // If this is a new conversation not yet in list, insert it or reload
+          if (typeof chatOfMessage === 'object' && chatOfMessage._id) {
+            return [{ ...chatOfMessage, latestMessage: newMessage, updatedAt: new Date().toISOString() }, ...prevChats];
+          }
           loadChats();
           return prevChats;
         }
+
         return prevChats
           .map((c) => {
-            if (c._id === chatId) {
+            if (areIdsEqual(c._id, chatId)) {
               return { ...c, latestMessage: newMessage, updatedAt: new Date().toISOString() };
             }
             return c;
           })
-          .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+          .sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
       });
     };
 
@@ -156,14 +258,13 @@ export const ChatProvider = ({ children }) => {
 
       setTypingMap((prev) => ({ ...prev, [targetChatId]: true }));
 
-      // Safety timeout: auto-clear typing after 3 seconds if stop-typing is lost
       if (typingTimeoutMapRef.current[targetChatId]) {
         clearTimeout(typingTimeoutMapRef.current[targetChatId]);
       }
       typingTimeoutMapRef.current[targetChatId] = setTimeout(() => {
         setTypingMap((prev) => ({ ...prev, [targetChatId]: false }));
         delete typingTimeoutMapRef.current[targetChatId];
-      }, 3000);
+      }, 3500);
     };
 
     const handleStopTyping = (room) => {
@@ -173,7 +274,6 @@ export const ChatProvider = ({ children }) => {
 
       setTypingMap((prev) => ({ ...prev, [targetChatId]: false }));
 
-      // Cancel the safety timeout since we got the explicit stop
       if (typingTimeoutMapRef.current[targetChatId]) {
         clearTimeout(typingTimeoutMapRef.current[targetChatId]);
         delete typingTimeoutMapRef.current[targetChatId];
@@ -181,7 +281,6 @@ export const ChatProvider = ({ children }) => {
     };
 
     const handleDisconnect = () => {
-      // Clear all typing indicators on disconnect
       setTypingMap({});
       Object.values(typingTimeoutMapRef.current).forEach(clearTimeout);
       typingTimeoutMapRef.current = {};
@@ -198,15 +297,19 @@ export const ChatProvider = ({ children }) => {
       socket.off('stop-typing', handleStopTyping);
       socket.off('disconnect', handleDisconnect);
     };
-  }, [socket]);
+  }, [socket, playNotificationSound, loadChats]);
 
   // Access or create 1-on-1 chat
   const accessChat = async (targetUserId) => {
     try {
       const chat = await chatApi.accessChat(targetUserId);
-      if (!chats.find((c) => c._id === chat._id)) {
-        setChats((prev) => [chat, ...prev]);
-      }
+      setChats((prev) => {
+        const exists = prev.some((c) => areIdsEqual(c._id, chat._id));
+        if (exists) {
+          return prev.map((c) => (areIdsEqual(c._id, chat._id) ? { ...c, ...chat } : c));
+        }
+        return [chat, ...prev];
+      });
       setSelectedChat(chat);
       return chat;
     } catch (err) {
@@ -228,60 +331,69 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  // Send message
+  // Explicit deselect chat (e.g. mobile back)
+  const clearSelectedChat = () => {
+    setSelectedChat(null);
+    if (userId) {
+      localStorage.removeItem(`chime_active_chat_${userId}`);
+    }
+  };
+
+  // Send message with optimistic update & rollback on error
   const sendMessage = async (content) => {
     if (!selectedChat || !content.trim()) return;
 
-    const tempId = 'temp_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+    const currentChat = selectedChat;
+    const tempId = 'temp_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
     const tempMessage = {
       _id: tempId,
       content,
       sender: user,
-      chat: selectedChat,
+      chat: currentChat,
       createdAt: new Date().toISOString(),
       isOptimistic: true,
     };
 
-    // 1. Instant optimistic update in local state for sender
+    // 1. Instant optimistic update
     setMessages((prev) => [...prev, tempMessage]);
     setChats((prev) =>
       prev
         .map((c) =>
-          c._id === selectedChat._id
+          areIdsEqual(c._id, currentChat._id)
             ? { ...c, latestMessage: tempMessage, updatedAt: new Date().toISOString() }
             : c
         )
-        .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+        .sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0))
     );
 
     try {
       // 2. Persist to server
-      const message = await messageApi.sendMessage(content, selectedChat._id);
+      const message = await messageApi.sendMessage(content, currentChat._id);
 
       // 3. Replace temp message with server response
       setMessages((prev) =>
         prev.map((m) => (m._id === tempId ? message : m))
       );
 
-      // 4. Emit socket event for instant real-time delivery to recipient
+      // 4. Emit socket event for real-time delivery
       if (socket) {
         socket.emit('send-message', message);
       }
 
-      // Update chats list with final saved message
+      // 5. Update chats list with final saved message
       setChats((prev) =>
         prev
           .map((c) =>
-            c._id === selectedChat._id
+            areIdsEqual(c._id, currentChat._id)
               ? { ...c, latestMessage: message, updatedAt: new Date().toISOString() }
               : c
           )
-          .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+          .sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0))
       );
 
       return message;
     } catch (err) {
-      // Revert optimistic message if error occurred
+      // Revert optimistic message on failure
       setMessages((prev) => prev.filter((m) => m._id !== tempId));
       console.error('Failed to send message:', err.message);
       throw err;
@@ -295,10 +407,12 @@ export const ChatProvider = ({ children }) => {
         setChats,
         selectedChat,
         setSelectedChat,
+        clearSelectedChat,
         messages,
         setMessages,
         loadingChats,
         loadingMessages,
+        fetchError,
         typingMap,
         unreadMap,
         loadChats,
@@ -319,3 +433,4 @@ export const useChat = () => {
   }
   return context;
 };
+
