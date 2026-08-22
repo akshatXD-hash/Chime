@@ -106,10 +106,10 @@ export const ProfileModal = ({ isOpen, onClose }) => {
             <div className="w-24 h-24 rounded-2xl bg-devs-card border border-devs-border overflow-hidden flex items-center justify-center font-bold text-2xl text-devs-indigo shadow-subtle">
               {preview ? (
                 <img src={preview} alt="New Preview" className="w-full h-full object-cover" />
-              ) : user.pic ? (
-                <img src={user.pic} alt={user.name} className="w-full h-full object-cover" />
+              ) : user?.pic ? (
+                <img src={user.pic} alt={user.name || 'User'} className="w-full h-full object-cover" />
               ) : (
-                user.name?.charAt(0).toUpperCase()
+                (user?.name || user?.email || 'U').charAt(0).toUpperCase()
               )}
             </div>
             <label className="absolute -bottom-1 -right-1 p-2 rounded-xl bg-devs-blue hover:bg-devs-blueHover text-white cursor-pointer shadow-subtle transition-transform active:scale-95">
