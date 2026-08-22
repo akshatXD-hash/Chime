@@ -27,8 +27,16 @@ export const Register = ({ onSwitchToLogin }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name || !email || !password) {
+    if (!name.trim() || !email.trim() || !password) {
       setError('Please fill in all required fields');
+      return;
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
       return;
     }
 
