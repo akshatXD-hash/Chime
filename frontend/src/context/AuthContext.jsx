@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authApi } from '../api/authApi';
 
 const AuthContext = createContext(null);
@@ -7,7 +7,12 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     try {
       const savedUser = localStorage.getItem('chime_user');
-      return savedUser ? JSON.parse(savedUser) : null;
+      const savedToken = localStorage.getItem('chime_token');
+      // If token is missing, consider session invalid
+      if (savedUser && savedToken) {
+        return JSON.parse(savedUser);
+      }
+      return null;
     } catch {
       return null;
     }
@@ -15,7 +20,9 @@ export const AuthProvider = ({ children }) => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [authNotice, setAuthNotice] = useState(null);
 
+  // Sync user object with localStorage
   useEffect(() => {
     if (user) {
       localStorage.setItem('chime_user', JSON.stringify(user));
@@ -25,15 +32,39 @@ export const AuthProvider = ({ children }) => {
     }
   }, [user]);
 
+  const logout = useCallback((reason = null) => {
+    setUser(null);
+    localStorage.removeItem('chime_user');
+    localStorage.removeItem('chime_token');
+    if (reason) {
+      setAuthNotice(reason);
+    }
+  }, []);
+
+  // Listen for unauthorized 401 events dispatched from axiosClient
+  useEffect(() => {
+    const handleAuthExpired = (e) => {
+      const message = e.detail?.message || 'Your session has expired. Please sign in again.';
+      console.warn('Session expired:', message);
+      logout(message);
+    };
+
+    window.addEventListener('chime:auth-expired', handleAuthExpired);
+    return () => {
+      window.removeEventListener('chime:auth-expired', handleAuthExpired);
+    };
+  }, [logout]);
+
   const login = async (email, password) => {
     setLoading(true);
     setError(null);
+    setAuthNotice(null);
     try {
       const data = await authApi.signIn({ email, password });
-      setUser(data.user);
       if (data.token) {
         localStorage.setItem('chime_token', data.token);
       }
+      setUser(data.user);
       return data.user;
     } catch (err) {
       setError(err.message);
@@ -46,12 +77,13 @@ export const AuthProvider = ({ children }) => {
   const signup = async (formData) => {
     setLoading(true);
     setError(null);
+    setAuthNotice(null);
     try {
       const data = await authApi.signUp(formData);
-      setUser(data.user);
       if (data.token) {
         localStorage.setItem('chime_token', data.token);
       }
+      setUser(data.user);
       return data.user;
     } catch (err) {
       setError(err.message);
@@ -59,12 +91,6 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('chime_user');
-    localStorage.removeItem('chime_token');
   };
 
   const updateUserPic = (newPicUrl) => {
@@ -84,6 +110,8 @@ export const AuthProvider = ({ children }) => {
         loading,
         error,
         setError,
+        authNotice,
+        setAuthNotice,
         login,
         signup,
         logout,
@@ -102,3 +130,4 @@ export const useAuth = () => {
   }
   return context;
 };
+
