@@ -1,33 +1,38 @@
 import React from 'react';
-import { useChat } from '../../context/ChatContext';
+import { useChat, areIdsEqual } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
-import { Info, ArrowLeft, Users as GroupIcon } from 'lucide-react';
+import { Info, ArrowLeft, Users as GroupIcon, Phone, Video } from 'lucide-react';
 
-export const ChatHeader = ({ onToggleDetails, onBackMobile }) => {
+export const ChatHeader = ({ onToggleDetails, onBackMobile, onStartCall }) => {
   const { user } = useAuth();
   const { selectedChat, typingMap } = useChat();
   const { onlineUsers } = useSocket();
 
   if (!selectedChat) return null;
 
-  const isGroup = selectedChat.isGroupChat;
-  const isTyping = typingMap[selectedChat._id];
+  const currentUserId = user?._id || user?.id;
+  const isGroup = Boolean(selectedChat.isGroupChat);
+  const isTyping = selectedChat._id ? typingMap[selectedChat._id] : false;
 
   const getTargetUser = () => {
     if (isGroup) return null;
-    return selectedChat.users?.find((u) => u._id !== user?._id) || selectedChat.users?.[0];
+    const usersList = Array.isArray(selectedChat.users) ? selectedChat.users.filter(Boolean) : [];
+    return usersList.find((u) => !areIdsEqual(u._id || u, currentUserId)) || usersList[0] || {};
   };
 
   const targetUser = getTargetUser();
-  const title = isGroup ? selectedChat.chatName : targetUser?.name || 'Conversation';
+  const title = isGroup
+    ? selectedChat.chatName || 'Group Chat'
+    : targetUser?.name || targetUser?.email || 'Conversation';
   const avatarPic = isGroup ? null : targetUser?.pic;
 
-  const isTargetOnline = targetUser?._id && (
-    Array.isArray(onlineUsers)
-      ? onlineUsers.includes(targetUser._id)
-      : Boolean(onlineUsers[targetUser._id])
-  );
+  const isTargetOnline =
+    !isGroup &&
+    targetUser?._id &&
+    onlineUsers.some((uid) => areIdsEqual(uid, targetUser._id));
+
+  const membersCount = Array.isArray(selectedChat.users) ? selectedChat.users.length : 0;
 
   return (
     <div className="h-16 px-4 bg-devs-surface/95 border-b border-devs-border/80 flex items-center justify-between z-10 select-none flex-shrink-0">
@@ -53,17 +58,17 @@ export const ChatHeader = ({ onToggleDetails, onBackMobile }) => {
           ) : avatarPic ? (
             <img src={avatarPic} alt={title} className="w-full h-full object-cover" />
           ) : (
-            title.charAt(0).toUpperCase()
+            (title || 'C').charAt(0).toUpperCase()
           )}
         </div>
 
         {/* Info */}
         <div onClick={onToggleDetails} className="min-w-0 cursor-pointer">
           <h2 className="text-xs font-semibold text-white truncate flex items-center gap-2">
-            <span>{title}</span>
+            <span className="truncate">{title}</span>
             {isGroup && (
-              <span className="text-[10px] px-1.5 py-0.2 rounded bg-devs-indigo/15 text-devs-indigo font-medium">
-                {selectedChat.users?.length || 0} members
+              <span className="text-[10px] px-1.5 py-0.2 rounded bg-devs-indigo/15 text-devs-indigo font-medium flex-shrink-0">
+                {membersCount} members
               </span>
             )}
           </h2>
@@ -80,10 +85,15 @@ export const ChatHeader = ({ onToggleDetails, onBackMobile }) => {
               </span>
             ) : isGroup ? (
               <span className="text-devs-textMuted">
-                {selectedChat.users?.map((u) => u.name.split(' ')[0]).join(', ')}
+                {Array.isArray(selectedChat.users)
+                  ? selectedChat.users
+                      .filter(Boolean)
+                      .map((u) => (u.name ? u.name.split(' ')[0] : 'User'))
+                      .join(', ')
+                  : 'Group'}
               </span>
             ) : isTargetOnline ? (
-              <span className="text-emerald-400/90 font-medium flex items-center gap-1">
+              <span className="text-emerald-400 font-medium flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 Online
               </span>
@@ -99,6 +109,24 @@ export const ChatHeader = ({ onToggleDetails, onBackMobile }) => {
 
       {/* Right: Actions */}
       <div className="flex items-center gap-1 text-devs-textSecondary">
+        {onStartCall && !isGroup && (
+          <>
+            <button
+              onClick={() => onStartCall('audio')}
+              title="Start Voice Call"
+              className="p-2 rounded-xl hover:bg-devs-hover hover:text-white transition-colors"
+            >
+              <Phone className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => onStartCall('video')}
+              title="Start Video Call"
+              className="p-2 rounded-xl hover:bg-devs-hover hover:text-white transition-colors"
+            >
+              <Video className="w-4 h-4" />
+            </button>
+          </>
+        )}
         <button
           onClick={onToggleDetails}
           title="Conversation Details"
@@ -110,3 +138,5 @@ export const ChatHeader = ({ onToggleDetails, onBackMobile }) => {
     </div>
   );
 };
+
+
