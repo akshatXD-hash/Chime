@@ -19,8 +19,28 @@ export const MessageInput = () => {
   const timerRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const fileInputRef = useRef(null);
+  const inputRef = useRef(null);
 
   const isTypingEmittedRef = useRef(false);
+
+  // Focus input when active chat changes
+  useEffect(() => {
+    if (selectedChat?._id) {
+      inputRef.current?.focus();
+    }
+  }, [selectedChat?._id]);
+
+  // Close emoji picker on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && showEmoji) {
+        setShowEmoji(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showEmoji]);
+
 
   // Emit typing socket event with debounce
   const handleTextChange = (e) => {
@@ -199,6 +219,7 @@ export const MessageInput = () => {
 
           {/* Main Text Input */}
           <input
+            ref={inputRef}
             type="text"
             value={text}
             onChange={handleTextChange}
