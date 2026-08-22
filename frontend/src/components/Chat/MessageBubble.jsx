@@ -6,9 +6,15 @@ export const MessageBubble = ({ message, isOutgoing, showSenderName, onImageClic
 
   const formatTime = (dateString) => {
     if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return '';
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch {
+      return '';
+    }
   };
+
 
   const isImageUrl = message.content?.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i) || message.content?.startsWith('data:image/');
   const isAudioUrl = message.content?.match(/\.(mp3|wav|ogg|m4a)($|\?)/i) || message.content?.startsWith('data:audio/');
