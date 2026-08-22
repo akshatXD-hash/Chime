@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { useChat } from '../../context/ChatContext';
+import { useChat, areIdsEqual } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
 import { MessageBubble } from './MessageBubble';
 import { MessageCircle, X } from 'lucide-react';
@@ -10,31 +10,37 @@ export const MessageList = () => {
   const messagesEndRef = useRef(null);
   const [lightboxImage, setLightboxImage] = useState(null);
 
-  const isTyping = selectedChat ? typingMap[selectedChat._id] : false;
+  const currentUserId = user?._id || user?.id;
+  const isTyping = selectedChat?._id ? typingMap[selectedChat._id] : false;
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToBottom = (smooth = true) => {
+    messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, isTyping]);
+    scrollToBottom(true);
+  }, [messages.length, isTyping]);
 
   // Group messages by date
   const getDateLabel = (dateString) => {
     if (!dateString) return '';
-    const date = new Date(dateString);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return '';
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
 
-    if (date.toDateString() === today.toDateString()) {
-      return 'Today';
+      if (date.toDateString() === today.toDateString()) {
+        return 'Today';
+      }
+      if (date.toDateString() === yesterday.toDateString()) {
+        return 'Yesterday';
+      }
+      return date.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch {
+      return '';
     }
-    if (date.toDateString() === yesterday.toDateString()) {
-      return 'Yesterday';
-    }
-    return date.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
   return (
@@ -42,7 +48,7 @@ export const MessageList = () => {
       {/* Background Radial Dots */}
       <div className="absolute inset-0 bg-[radial-gradient(#1F2942_1px,transparent_1px)] [background-size:28px_28px] opacity-20 pointer-events-none" />
 
-      {loadingMessages && (
+      {loadingMessages && messages.length === 0 && (
         <div className="flex items-center justify-center h-full text-xs text-devs-textMuted">
           Loading conversation messages...
         </div>
@@ -62,13 +68,14 @@ export const MessageList = () => {
 
       {/* Render Messages grouped by date */}
       {messages.map((message, index) => {
-        const isOutgoing = message.sender?._id === user?._id;
+        const senderId = message.sender?._id || message.sender?.id || message.sender;
+        const isOutgoing = areIdsEqual(senderId, currentUserId);
 
         // Check if date divider is needed
         const currentDateLabel = getDateLabel(message.createdAt);
         const prevMessage = messages[index - 1];
         const prevDateLabel = prevMessage ? getDateLabel(prevMessage.createdAt) : null;
-        const showDateDivider = currentDateLabel !== prevDateLabel;
+        const showDateDivider = currentDateLabel && currentDateLabel !== prevDateLabel;
 
         return (
           <React.Fragment key={message._id || index}>
@@ -83,7 +90,7 @@ export const MessageList = () => {
             <MessageBubble
               message={message}
               isOutgoing={isOutgoing}
-              showSenderName={selectedChat?.isGroupChat}
+              showSenderName={Boolean(selectedChat?.isGroupChat)}
               onImageClick={(url) => setLightboxImage(url)}
             />
           </React.Fragment>
@@ -108,7 +115,7 @@ export const MessageList = () => {
       {lightboxImage && (
         <div
           onClick={() => setLightboxImage(null)}
-          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 cursor-zoom-out"
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 cursor-zoom-out animate-in fade-in duration-150"
         >
           <button
             onClick={() => setLightboxImage(null)}
@@ -126,3 +133,4 @@ export const MessageList = () => {
     </div>
   );
 };
+
