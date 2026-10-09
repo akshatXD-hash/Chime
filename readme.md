@@ -4,7 +4,7 @@ Chime is a modern, high-performance, real-time web chat application featuring a 
 
 ---
 
-## ✨ Features
+## ✨ Features of the website
 
 ### 🔐 Authentication & Profile
 - JWT-based signup and signin with secure HTTP-only token handling.
