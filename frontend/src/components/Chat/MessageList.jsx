@@ -6,7 +6,7 @@ import { MessageCircle, X } from 'lucide-react';
 
 export const MessageList = () => {
   const { user } = useAuth();
-  const { messages, loadingMessages, selectedChat, typingMap } = useChat();
+  const { messages, loadingMessages, selectedChat, typingMap, messageError, retryMessages } = useChat();
   const messagesEndRef = useRef(null);
   const [lightboxImage, setLightboxImage] = useState(null);
 
@@ -54,7 +54,9 @@ export const MessageList = () => {
         </div>
       )}
 
-      {!loadingMessages && messages.length === 0 && (
+      {messageError && (<div role="alert" className="relative p-3 rounded-xl border border-amber-500/30 text-sm text-amber-200">{messageError}<button onClick={retryMessages} className="ml-3 underline">Retry</button></div>)}
+
+      {!loadingMessages && !messageError && messages.length === 0 && (
         <div className="flex flex-col items-center justify-center h-full text-devs-textMuted space-y-2 select-none">
           <div className="w-12 h-12 rounded-2xl bg-devs-card border border-devs-border flex items-center justify-center text-devs-indigo shadow-subtle mb-1">
             <MessageCircle className="w-6 h-6" />

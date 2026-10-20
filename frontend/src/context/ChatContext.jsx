@@ -156,28 +156,37 @@ export const ChatProvider = ({ children }) => {
     prevSelectedChatIdRef.current = newId;
   }, [selectedChat?._id]);
 
-  // Load messages when selectedChat changes
+  const [messageError, setMessageError] = useState(null);
+  const [messageRevision, setMessageRevision] = useState(0);
+  const messageRequestRef = useRef(0);
+  const retryMessages = useCallback(() => setMessageRevision((n) => n + 1), []);
+
   useEffect(() => {
-    if (!selectedChat || !selectedChat._id) {
-      setMessages([]);
+    const request = ++messageRequestRef.current;
+    const chatId = selectedChat?._id;
+    setMessages([]);
+    setMessageError(null);
+    if (!chatId) {
+      setLoadingMessages(false);
       return;
     }
-
-    const loadMessages = async () => {
-      setLoadingMessages(true);
-      try {
-        const data = await messageApi.getMessages(selectedChat._id);
-        setMessages(Array.isArray(data) ? data : []);
-        setUnreadMap((prev) => ({ ...prev, [selectedChat._id]: 0 }));
-      } catch (err) {
-        console.error('Error fetching messages:', err.message);
-      } finally {
-        setLoadingMessages(false);
-      }
-    };
-
-    loadMessages();
-  }, [selectedChat?._id]);
+    let active = true;
+    setLoadingMessages(true);
+    messageApi.getMessages(chatId).then((data) => {
+      if (!active || request !== messageRequestRef.current) return;
+      setMessages((current) => {
+        const merged = new Map((Array.isArray(data) ? data : []).map((m) => [m._id, m]));
+        current.forEach((m) => merged.set(m._id, m));
+        return [...merged.values()].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      });
+      setUnreadMap((prev) => ({ ...prev, [chatId]: 0 }));
+    }).catch((err) => {
+      if (active) setMessageError(err.message || 'Could not load messages');
+    }).finally(() => {
+      if (active) setLoadingMessages(false);
+    });
+    return () => { active = false; };
+  }, [selectedChat?._id, messageRevision]);
 
   // Cleanup all typing timeouts on unmount
   useEffect(() => {
@@ -412,6 +421,8 @@ export const ChatProvider = ({ children }) => {
         setMessages,
         loadingChats,
         loadingMessages,
+        messageError,
+        retryMessages,
         fetchError,
         typingMap,
         unreadMap,
