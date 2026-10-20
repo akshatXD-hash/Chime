@@ -43,7 +43,7 @@ class ErrorBoundary extends Component {
           </div>
           <h2 className="text-xl font-bold text-white mb-2">Something went wrong</h2>
           <p className="text-xs text-devs-textMuted max-w-sm mb-6 leading-relaxed">
-            {this.state.error?.message || 'An unexpected rendering error occurred. Please reload to continue.'}
+            We couldn't display this page. Please reload to try again.
           </p>
           <button
             onClick={this.handleReload}

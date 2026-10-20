@@ -13,7 +13,7 @@ export const authMiddleware = (req, res, next) => {
 
     if (!token) {
       return res.status(401).json({
-        message: "token not found",
+        message: "Please sign in to continue.",
       });
     }
 
@@ -28,7 +28,7 @@ export const authMiddleware = (req, res, next) => {
   } catch (err) {
     console.log("Auth middleware error:", err.message);
     return res.status(401).json({
-      message: "Invalid or expired token",
+      message: "Your session has expired. Please sign in again.",
     });
   }
 };

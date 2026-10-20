@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getErrorMessage, SESSION_EXPIRED } from '../utils/errorMessages';
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'https://chime-gjoi.onrender.com';
 
@@ -33,14 +34,14 @@ axiosClient.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status;
-    const message = error.response?.data?.message || error.message || 'An error occurred';
+    const message = getErrorMessage(error);
 
     // Handle token expiry / 401 Unauthorized
     if (status === 401 && !/\/api\/auth\/(signin|signup)/.test(error.config?.url || '')) {
       // Dispatch custom event so AuthContext can cleanly handle logout and show notification
       window.dispatchEvent(
         new CustomEvent('chime:auth-expired', {
-          detail: { message: message || 'Your session has expired. Please sign in again.' },
+          detail: { message: SESSION_EXPIRED },
         })
       );
     }

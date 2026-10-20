@@ -77,7 +77,7 @@ export const MessageInput = () => {
       draftsRef.current.set(chatId, { text: pendingText, attachment: pendingAttachment });
       setText(pendingText);
       setAttachment(pendingAttachment);
-      setError(`Message not sent. ${err.message}. Your draft is ready to try again.`);
+      setError(`Message not sent. ${err.message} Your draft is ready to try again.`);
     } finally {
       busyRef.current = false;
       setSending(false);

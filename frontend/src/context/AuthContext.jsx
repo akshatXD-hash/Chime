@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { SESSION_EXPIRED } from '../utils/errorMessages';
 import { authApi } from '../api/authApi';
 
 const AuthContext = createContext(null);
@@ -36,15 +37,13 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     localStorage.removeItem('chime_user');
     localStorage.removeItem('chime_token');
-    if (reason) {
-      setAuthNotice(reason);
-    }
+    setAuthNotice(typeof reason === 'string' ? reason : null);
   }, []);
 
   // Listen for unauthorized 401 events dispatched from axiosClient
   useEffect(() => {
     const handleAuthExpired = (e) => {
-      const message = e.detail?.message || 'Your session has expired. Please sign in again.';
+      const message = SESSION_EXPIRED;
       console.warn('Session expired:', message);
       logout(message);
     };
