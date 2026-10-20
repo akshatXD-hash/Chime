@@ -12,6 +12,7 @@ export const NewGroupModal = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState(null);
+  const requestRef = useRef(0);
   const debounceRef = useRef(null);
 
   useEffect(() => {
@@ -23,6 +24,7 @@ export const NewGroupModal = ({ isOpen, onClose }) => {
       setError(null);
     }
     return () => {
+      ++requestRef.current;
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
   }, [isOpen]);
@@ -30,6 +32,9 @@ export const NewGroupModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   const handleSearch = (query) => {
+    const request = ++requestRef.current;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setLoading(false);
     setSearchQuery(query);
     setError(null);
     if (!query.trim()) {
@@ -42,11 +47,12 @@ export const NewGroupModal = ({ isOpen, onClose }) => {
       setLoading(true);
       try {
         const results = await userApi.searchUsers(query);
+        if (request !== requestRef.current) return;
         setSearchResults(Array.isArray(results) ? results : []);
       } catch (err) {
-        console.error(err);
+        if (request === requestRef.current) setError(err.message || 'Could not search people');
       } finally {
-        setLoading(false);
+        if (request === requestRef.current) setLoading(false);
       }
     }, 250);
   };
@@ -70,6 +76,7 @@ export const NewGroupModal = ({ isOpen, onClose }) => {
       return;
     }
 
+    if (creating) return;
     setCreating(true);
     setError(null);
     try {

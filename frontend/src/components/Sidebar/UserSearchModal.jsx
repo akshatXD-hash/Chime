@@ -10,18 +10,21 @@ export const UserSearchModal = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [selectingUserId, setSelectingUserId] = useState(null);
   const [error, setError] = useState(null);
+  const requestRef = useRef(0);
   const debounceTimeoutRef = useRef(null);
 
   const fetchUsers = async (query = '') => {
+    const request = ++requestRef.current;
     setLoading(true);
     setError(null);
     try {
       const results = await userApi.searchUsers(query);
+      if (request !== requestRef.current) return;
       setSearchResults(Array.isArray(results) ? results : []);
     } catch (err) {
-      setError(err.message || 'Failed to fetch users');
+      if (request === requestRef.current) setError(err.message || 'Failed to fetch users');
     } finally {
-      setLoading(false);
+      if (request === requestRef.current) setLoading(false);
     }
   };
 
@@ -33,6 +36,7 @@ export const UserSearchModal = ({ isOpen, onClose }) => {
       fetchUsers('');
     }
     return () => {
+      ++requestRef.current;
       if (debounceTimeoutRef.current) {
         clearTimeout(debounceTimeoutRef.current);
       }
@@ -43,6 +47,9 @@ export const UserSearchModal = ({ isOpen, onClose }) => {
 
   const handleQueryChange = (e) => {
     const query = e.target.value;
+    ++requestRef.current;
+    setSearchResults([]);
+    setLoading(true);
     setSearchQuery(query);
     setError(null);
 
