@@ -2,12 +2,16 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useChat, areIdsEqual } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
 import { MessageBubble } from './MessageBubble';
-import { MessageCircle, X } from 'lucide-react';
+import { MessageCircle, X, ArrowDown } from 'lucide-react';
 
 export const MessageList = () => {
   const { user } = useAuth();
   const { messages, loadingMessages, selectedChat, typingMap, messageError, retryMessages } = useChat();
   const messagesEndRef = useRef(null);
+  const scrollRef = useRef(null);
+  const nearBottomRef = useRef(true);
+  const firstScrollRef = useRef(true);
+  const [showJump, setShowJump] = useState(false);
   const [lightboxImage, setLightboxImage] = useState(null);
 
   const currentUserId = user?._id || user?.id;
@@ -18,8 +22,29 @@ export const MessageList = () => {
   };
 
   useEffect(() => {
-    scrollToBottom(true);
-  }, [messages.length, isTyping]);
+    firstScrollRef.current = true;
+    nearBottomRef.current = true;
+    setShowJump(false);
+    setLightboxImage(null);
+  }, [selectedChat?._id]);
+
+  useEffect(() => {
+    const last = messages[messages.length - 1];
+    const ownMessage = last?.isOptimistic;
+    if (firstScrollRef.current || nearBottomRef.current || ownMessage) {
+      scrollToBottom(!firstScrollRef.current);
+      if (messages.length) firstScrollRef.current = false;
+    } else {
+      setShowJump(true);
+    }
+  }, [messages.length, isTyping, selectedChat?._id]);
+
+  useEffect(() => {
+    if (!lightboxImage) return;
+    const close = (event) => { if (event.key === 'Escape') setLightboxImage(null); };
+    window.addEventListener('keydown', close);
+    return () => window.removeEventListener('keydown', close);
+  }, [lightboxImage]);
 
   // Group messages by date
   const getDateLabel = (dateString) => {
@@ -44,10 +69,11 @@ export const MessageList = () => {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-devs-bg relative selection:bg-devs-blue selection:text-white">
-      {/* Background Radial Dots */}
-      <div className="absolute inset-0 bg-[radial-gradient(#1F2942_1px,transparent_1px)] [background-size:28px_28px] opacity-20 pointer-events-none" />
-
+    <div ref={scrollRef} onScroll={() => {
+      const node = scrollRef.current;
+      nearBottomRef.current = node.scrollHeight - node.scrollTop - node.clientHeight < 100;
+      if (nearBottomRef.current) setShowJump(false);
+    }} onLoadCapture={() => { if (nearBottomRef.current) scrollToBottom(false); }} className="message-list flex-1 min-h-0 overflow-y-auto px-4 py-5 md:px-8 space-y-3 bg-devs-bg relative selection:bg-devs-blue selection:text-white" aria-label="Conversation messages" aria-busy={loadingMessages}>
       {loadingMessages && messages.length === 0 && (
         <div className="flex items-center justify-center h-full text-xs text-devs-textMuted">
           Loading conversation messages...
@@ -112,6 +138,7 @@ export const MessageList = () => {
       )}
 
       <div ref={messagesEndRef} />
+      {showJump && <button onClick={() => { nearBottomRef.current = true; scrollToBottom(); setShowJump(false); }} className="sticky bottom-2 mx-auto flex items-center gap-2 rounded-full bg-devs-blue px-4 py-2 text-sm text-white shadow-lg"><ArrowDown size={16} />Latest messages</button>}
 
       {/* Lightbox Modal */}
       {lightboxImage && (
@@ -120,6 +147,7 @@ export const MessageList = () => {
           className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 cursor-zoom-out animate-in fade-in duration-150"
         >
           <button
+            aria-label="Close image preview"
             onClick={() => setLightboxImage(null)}
             className="absolute top-4 right-4 p-2 rounded-xl bg-devs-card text-white hover:bg-devs-hover border border-devs-border"
           >
