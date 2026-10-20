@@ -1,3 +1,4 @@
+import { Avatar } from '../Common/Avatar';
 import React from 'react';
 import { useChat, areIdsEqual } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
@@ -55,10 +56,8 @@ export const ChatHeader = ({ onToggleDetails, onBackMobile, onStartCall }) => {
             <div className="w-full h-full bg-devs-blue flex items-center justify-center text-white">
               <GroupIcon className="w-5 h-5" />
             </div>
-          ) : avatarPic ? (
-            <img src={avatarPic} alt={title} className="w-full h-full object-cover" />
           ) : (
-            (title || 'C').charAt(0).toUpperCase()
+            <Avatar src={avatarPic} name={title} />
           )}
         </div>
 

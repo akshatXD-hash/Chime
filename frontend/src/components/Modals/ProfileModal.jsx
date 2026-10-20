@@ -1,3 +1,4 @@
+import { Avatar } from '../Common/Avatar';
 import { useDialog } from '../../hooks/useDialog';
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
@@ -107,13 +108,7 @@ export const ProfileModal = ({ isOpen, onClose }) => {
           {/* Avatar with Upload Hover */}
           <div className="relative group">
             <div className="w-24 h-24 rounded-2xl bg-devs-card border border-devs-border overflow-hidden flex items-center justify-center font-bold text-2xl text-devs-indigo shadow-subtle">
-              {preview ? (
-                <img src={preview} alt="New Preview" className="w-full h-full object-cover" />
-              ) : user?.pic ? (
-                <img src={user.pic} alt={user.name || 'User'} className="w-full h-full object-cover" />
-              ) : (
-                (user?.name || user?.email || 'U').charAt(0).toUpperCase()
-              )}
+              <Avatar src={preview || user?.pic} name={user?.name} />
             </div>
             <label className="absolute -bottom-1 -right-1 p-2 rounded-xl bg-devs-blue hover:bg-devs-blueHover text-white cursor-pointer shadow-subtle transition-transform active:scale-95">
               <Camera className="w-3.5 h-3.5" />

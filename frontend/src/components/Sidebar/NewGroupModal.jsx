@@ -1,3 +1,4 @@
+import { Avatar } from '../Common/Avatar';
 import { useDialog } from '../../hooks/useDialog';
 import React, { useState, useEffect, useRef } from 'react';
 import { userApi } from '../../api/userApi';
@@ -195,11 +196,7 @@ export const NewGroupModal = ({ isOpen, onClose }) => {
                 >
                   <div className="flex items-center gap-2.5">
                     <div className="w-7 h-7 rounded-xl bg-devs-card border border-devs-border overflow-hidden flex items-center justify-center font-bold text-xs text-devs-indigo flex-shrink-0">
-                      {userItem.pic ? (
-                        <img src={userItem.pic} alt={userItem.name} className="w-full h-full object-cover" />
-                      ) : (
-                        (userItem.name || 'U').charAt(0).toUpperCase()
-                      )}
+                      <Avatar src={userItem.pic} name={userItem.name} />
                     </div>
                     <div className="min-w-0">
                       <h4 className="text-xs font-semibold text-white truncate">{userItem.name}</h4>

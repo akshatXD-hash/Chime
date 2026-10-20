@@ -1,3 +1,4 @@
+import { Avatar } from '../Common/Avatar';
 import React from 'react';
 import { MessageSquare, Settings, LogOut, User as UserIcon } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -37,11 +38,7 @@ export const NavRail = ({ hiddenOnMobile, onOpenProfile, onOpenSettings }) => {
           title={user?.name || 'Profile'}
           className="relative w-9 h-9 md:w-10 md:h-10 rounded-2xl border border-devs-border hover:border-devs-blue/60 transition-all overflow-hidden flex items-center justify-center bg-devs-card shadow-subtle group"
         >
-          {user?.pic ? (
-            <img src={user.pic} alt={user.name || 'Profile'} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-          ) : (
-            <UserIcon className="w-4 h-4 text-devs-textSecondary" />
-          )}
+          <Avatar src={user?.pic} name={user?.name} />
           {/* Real-time status dot */}
           <span
             className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-devs-surface ${

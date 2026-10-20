@@ -1,3 +1,4 @@
+import { Avatar } from '../Common/Avatar';
 import React, { useState, useMemo } from 'react';
 import { useChat, areIdsEqual } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
@@ -279,10 +280,8 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
                       <div className="w-full h-full bg-devs-blue flex items-center justify-center text-white">
                         <GroupIcon className="w-5 h-5" />
                       </div>
-                    ) : details.pic ? (
-                      <img src={details.pic} alt={details.name} className="w-full h-full object-cover" />
                     ) : (
-                      (details.name || 'U').charAt(0).toUpperCase()
+                      <Avatar src={details.pic} name={details.name} />
                     )}
                   </div>
                   {!details.isGroup && (

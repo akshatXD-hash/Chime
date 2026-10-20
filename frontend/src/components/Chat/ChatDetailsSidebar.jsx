@@ -1,3 +1,4 @@
+import { Avatar } from '../Common/Avatar';
 import React, { useState } from 'react';
 import { useChat, areIdsEqual } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
@@ -131,10 +132,8 @@ export const ChatDetailsSidebar = ({ isOpen, onClose }) => {
                 <div className="w-full h-full bg-devs-blue flex items-center justify-center text-white">
                   <GroupIcon className="w-10 h-10" />
                 </div>
-              ) : targetUser?.pic ? (
-                <img src={targetUser.pic} alt={title} className="w-full h-full object-cover" />
               ) : (
-                (title || 'U').charAt(0).toUpperCase()
+                <Avatar src={targetUser?.pic} name={title} />
               )}
             </div>
 
@@ -243,11 +242,7 @@ export const ChatDetailsSidebar = ({ isOpen, onClose }) => {
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div className="w-7 h-7 rounded-xl bg-devs-card border border-devs-border overflow-hidden flex items-center justify-center font-bold text-xs text-devs-indigo flex-shrink-0">
-                          {member.pic ? (
-                            <img src={member.pic} alt={member.name} className="w-full h-full object-cover" />
-                          ) : (
-                            (member.name || 'U').charAt(0).toUpperCase()
-                          )}
+                          <Avatar src={member.pic} name={member.name} />
                         </div>
                         <div className="min-w-0">
                           <h5 className="text-xs font-semibold text-white truncate flex items-center gap-1">

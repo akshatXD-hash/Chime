@@ -1,3 +1,4 @@
+import { Avatar } from '../Common/Avatar';
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Mail, Lock, User as UserIcon, Camera, Eye, EyeOff, MessageCircle, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
@@ -90,11 +91,7 @@ export const Register = ({ onSwitchToLogin }) => {
           <div className="flex flex-col items-center mb-1">
             <div className="relative group">
               <div className="w-20 h-20 rounded-2xl bg-devs-card border border-devs-border overflow-hidden flex items-center justify-center shadow-subtle">
-                {avatarPreview ? (
-                  <img src={avatarPreview} alt="Avatar Preview" className="w-full h-full object-cover" />
-                ) : (
-                  <UserIcon className="w-8 h-8 text-devs-textMuted" />
-                )}
+                <Avatar src={avatarPreview} name={name || "Your"} />
               </div>
               <label className="absolute bottom-0 right-0 p-2 rounded-xl bg-devs-blue text-white cursor-pointer hover:bg-devs-blueHover transition-transform hover:scale-105 shadow-sm">
                 <Camera className="w-3.5 h-3.5" />
