@@ -106,7 +106,7 @@ export const MessageInput = () => {
     <div className="composer border-t border-devs-border bg-devs-surface px-4 py-3 relative flex-shrink-0">
       {error && <p role="alert" className="mb-3 text-sm text-amber-200">{error}</p>}
       {showEmoji && <div className="absolute bottom-full left-2 mb-2 z-50" onKeyDown={(e) => { if (e.key === 'Escape') setShowEmoji(false); }}>
-        <Suspense fallback={<p className="p-4 bg-devs-card">Loading emoji…</p>}>
+        <Suspense fallback={<p className="p-4 bg-devs-card">Loading emojiâ€¦</p>}>
           <EmojiPicker theme="dark" width={300} height={350} onEmojiClick={(emoji) => changeText(text + emoji.emoji)} />
         </Suspense>
       </div>}
@@ -121,7 +121,7 @@ export const MessageInput = () => {
         <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/gif,image/webp" onChange={handleFile} className="hidden" />
         <textarea ref={inputRef} aria-label="Message" rows={1} value={text} disabled={sending} onChange={(e) => changeText(e.target.value)} onKeyDown={(e) => {
           if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); handleSend(); }
-        }} placeholder="Write a message…" className="min-w-0 flex-1 resize-none rounded-xl glass-input px-3 py-2.5 text-sm leading-6 max-h-36" />
+        }} placeholder="Write a messageâ€¦" className="min-w-0 flex-1 resize-none rounded-xl glass-input px-3 py-2.5 text-sm leading-6 max-h-36" />
         <button type="submit" aria-label="Send message" disabled={sending || reading || (!text.trim() && !attachment)} className="h-11 w-11 flex items-center justify-center rounded-xl bg-devs-blue hover:bg-devs-blueHover disabled:opacity-40 text-white">
           {sending ? <Loader2 size={19} className="animate-spin" /> : <Send size={19} />}
         </button>

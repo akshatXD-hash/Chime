@@ -212,7 +212,7 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
         {!loadingChats && chats.length > 0 && filteredChats.length === 0 && (
           <div className="p-8 text-center text-xs text-devs-textMuted flex flex-col items-center gap-2">
             <Search className="w-7 h-7 text-devs-textMuted/40" />
-            <p>{searchQuery ? `No conversations matching ì${searchQuery}î` : filterTab === 'unread' ? 'Youíre all caught up.' : 'No group conversations yet.'}</p>
+            <p>{searchQuery ? `No conversations matching ‚Äú${searchQuery}‚Äù` : filterTab === 'unread' ? 'You‚Äôre all caught up.' : 'No group conversations yet.'}</p>
             <button
               onClick={() => {
                 setSearchQuery('');

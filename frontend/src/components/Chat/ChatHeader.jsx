@@ -64,7 +64,7 @@ export const ChatHeader = ({ onToggleDetails, onBackMobile, onStartCall }) => {
 
         {/* Info */}
         <div onClick={onToggleDetails} className="min-w-0 cursor-pointer">
-          <h2 className="text-xs font-semibold text-white truncate flex items-center gap-2">
+          <h2 className="text-sm font-semibold text-white truncate flex items-center gap-2">
             <span className="truncate">{title}</span>
             {isGroup && (
               <span className="text-[10px] px-1.5 py-0.2 rounded bg-devs-indigo/15 text-devs-indigo font-medium flex-shrink-0">

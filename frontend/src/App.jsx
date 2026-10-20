@@ -13,7 +13,6 @@ import { MessageList } from './components/Chat/MessageList';
 import { MessageInput } from './components/Chat/MessageInput';
 import { ChatDetailsSidebar } from './components/Chat/ChatDetailsSidebar';
 import { ProfileModal } from './components/Modals/ProfileModal';
-import { CallModal } from './components/Modals/CallModal';
 import { MessageSquare, AlertTriangle, RefreshCw } from 'lucide-react';
 
 class ErrorBoundary extends Component {
@@ -61,7 +60,6 @@ class ErrorBoundary extends Component {
 }
 
 const MainLayout = () => {
-  const { user } = useAuth();
   const { selectedChat, clearSelectedChat } = useChat();
   const { connectionStatus } = useSocket();
 
@@ -70,23 +68,10 @@ const MainLayout = () => {
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [isCallOpen, setIsCallOpen] = useState(false);
-  const [callType, setCallType] = useState('audio'); // 'audio' | 'video'
 
   useEffect(() => {
     setIsDetailsOpen(false);
-    setIsCallOpen(false);
   }, [selectedChat?._id]);
-
-  const currentUserId = user?._id || user?.id;
-  const targetUser = selectedChat && !selectedChat.isGroupChat
-    ? selectedChat.users?.find((u) => String(u?._id || u?.id || u) !== String(currentUserId)) || selectedChat.users?.[0]
-    : null;
-
-  const handleStartCall = (type) => {
-    setCallType(type);
-    setIsCallOpen(true);
-  };
 
   return (
     <div className="flex flex-col md:flex-row h-screen h-[100dvh] w-screen bg-devs-bg overflow-hidden text-devs-text select-none relative">
@@ -111,7 +96,7 @@ const MainLayout = () => {
         {connectionStatus !== 'connected' && (
           <div className="bg-devs-blue/15 border-b border-devs-blue/30 px-3 py-1 text-center text-[11px] text-devs-indigo font-medium flex items-center justify-center gap-1.5 animate-pulse">
             <span className="w-1.5 h-1.5 rounded-full bg-devs-indigo animate-ping" />
-            <span>{connectionStatus === 'connecting' ? 'Reconnecting…' : 'Live updates are offline. Messages will sync when you reconnect.'}</span>
+            <span>{connectionStatus === 'connecting' ? 'Reconnectingâ€¦' : 'Live updates are offline. Messages will sync when you reconnect.'}</span>
           </div>
         )}
 
@@ -163,13 +148,7 @@ const MainLayout = () => {
       <UserSearchModal isOpen={isSearchModalOpen} onClose={() => setIsSearchModalOpen(false)} />
       <NewGroupModal isOpen={isGroupModalOpen} onClose={() => setIsGroupModalOpen(false)} />
       <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
-      <CallModal
-        isOpen={isCallOpen}
-        callType={callType}
-        contactName={targetUser?.name || 'Call'}
-        contactPic={targetUser?.pic}
-        onClose={() => setIsCallOpen(false)}
-      />
+
     </div>
   );
 };
