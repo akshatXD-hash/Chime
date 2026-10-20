@@ -379,6 +379,7 @@ export const ChatProvider = ({ children }) => {
     if (!selectedChat || !content.trim()) return;
 
     const currentChat = selectedChat;
+    const previousPreview = chats.find((c) => areIdsEqual(c._id, currentChat._id));
     const tempId = 'temp_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
     const tempMessage = {
       _id: tempId,
@@ -430,6 +431,11 @@ export const ChatProvider = ({ children }) => {
     } catch (err) {
       // Revert optimistic message on failure
       updateChatMessages(currentChat._id, (prev) => prev.filter((m) => m._id !== tempId));
+      setChats((prev) => prev.map((chat) =>
+        chat.latestMessage?._id === tempId
+          ? { ...chat, latestMessage: previousPreview?.latestMessage, updatedAt: previousPreview?.updatedAt }
+          : chat
+      ).sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0)));
       console.error('Failed to send message:', err.message);
       throw err;
     }

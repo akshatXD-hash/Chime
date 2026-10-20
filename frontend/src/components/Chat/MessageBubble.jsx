@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CheckCheck, Play, Pause } from 'lucide-react';
+import { Check, Clock, Play, Pause } from 'lucide-react';
 
 export const MessageBubble = ({ message, isOutgoing, showSenderName, onImageClick }) => {
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
@@ -83,7 +83,7 @@ export const MessageBubble = ({ message, isOutgoing, showSenderName, onImageClic
         >
           <span>{formatTime(message.createdAt)}</span>
           {isOutgoing && (
-            <CheckCheck className="w-3 h-3 text-cyan-200" />
+            message.isOptimistic ? <Clock aria-label="Sending" className="w-3 h-3" /> : <Check aria-label="Sent" className="w-3 h-3" />
           )}
         </div>
       </div>
