@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
-import { Check, Clock, Play, Pause } from 'lucide-react';
+import React, { memo } from 'react';
+import { Check, Clock } from 'lucide-react';
 
-export const MessageBubble = ({ message, isOutgoing, showSenderName, onImageClick }) => {
-  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+export const MessageBubble = memo(({ message, isOutgoing, showSenderName, onImageClick }) => {
 
   const formatTime = (dateString) => {
     if (!dateString) return '';
@@ -30,7 +29,7 @@ export const MessageBubble = ({ message, isOutgoing, showSenderName, onImageClic
 
       {/* Message Bubble Container */}
       <div
-        className={`relative px-3.5 py-2 rounded-2xl text-xs break-words transition-all ${
+        className={`relative px-3.5 py-2 rounded-2xl text-sm min-w-0 [overflow-wrap:anywhere] ${
           isOutgoing
             ? 'bubble-outgoing rounded-tr-xs'
             : 'bubble-incoming rounded-tl-xs'
@@ -41,43 +40,23 @@ export const MessageBubble = ({ message, isOutgoing, showSenderName, onImageClic
           <div className="mb-1 rounded-xl overflow-hidden cursor-pointer max-w-xs border border-white/10 shadow-subtle">
             <img
               src={message.content}
-              alt="Attachment"
+              alt="Image attachment"
+              loading="lazy"
+              decoding="async"
               onClick={() => onImageClick && onImageClick(message.content)}
               className="w-full h-auto object-cover hover:scale-102 transition-transform duration-200"
             />
           </div>
         ) : isAudioUrl ? (
-          /* Voice Message Player */
-          <div className="flex items-center gap-2.5 py-0.5 min-w-[190px]">
-            <button
-              onClick={() => setIsPlayingAudio(!isPlayingAudio)}
-              className={`w-8 h-8 rounded-xl flex items-center justify-center text-white font-bold transition-transform active:scale-95 shadow-sm ${
-                isOutgoing ? 'bg-white/20 hover:bg-white/30' : 'bg-devs-blue hover:bg-devs-blueHover'
-              }`}
-            >
-              {isPlayingAudio ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 ml-0.5" />}
-            </button>
-            <div className="flex-1 flex items-center gap-0.5 h-5">
-              {[10, 16, 8, 20, 14, 22, 9, 18, 12, 24, 10].map((h, i) => (
-                <div
-                  key={i}
-                  style={{ height: `${h}px` }}
-                  className={`w-0.5 rounded-full transition-all ${
-                    isPlayingAudio ? 'bg-devs-cyan animate-pulse' : isOutgoing ? 'bg-white/60' : 'bg-devs-textMuted'
-                  }`}
-                />
-              ))}
-            </div>
-            <span className="text-[10px] opacity-75 font-mono">0:14</span>
-          </div>
+          <audio controls preload="none" src={message.content} aria-label="Audio message" className="max-w-full w-64" />
         ) : (
           /* Text Content */
-          <p className="whitespace-pre-wrap leading-relaxed text-xs">{message.content}</p>
+          <p className="whitespace-pre-wrap leading-relaxed text-sm">{message.content}</p>
         )}
 
         {/* Timestamp & Read Status Ticks */}
         <div
-          className={`flex items-center justify-end gap-1 mt-0.5 text-[9px] ${
+          className={`flex items-center justify-end gap-1 mt-0.5 text-[11px] ${
             isOutgoing ? 'text-indigo-100/80' : 'text-devs-textMuted'
           }`}
         >
@@ -89,4 +68,4 @@ export const MessageBubble = ({ message, isOutgoing, showSenderName, onImageClic
       </div>
     </div>
   );
-};
+});
