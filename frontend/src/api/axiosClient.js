@@ -10,7 +10,8 @@ export const axiosClient = axios.create({
 
 axiosClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('chime_token');
+    let token;
+    try { token = localStorage.getItem('chime_token'); } catch { /* Cookie authentication can still work. */ }
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -35,7 +36,7 @@ axiosClient.interceptors.response.use(
     const message = error.response?.data?.message || error.message || 'An error occurred';
 
     // Handle token expiry / 401 Unauthorized
-    if (status === 401) {
+    if (status === 401 && !/\/api\/auth\/(signin|signup)/.test(error.config?.url || '')) {
       // Dispatch custom event so AuthContext can cleanly handle logout and show notification
       window.dispatchEvent(
         new CustomEvent('chime:auth-expired', {
@@ -44,7 +45,8 @@ axiosClient.interceptors.response.use(
       );
     }
 
-    return Promise.reject(new Error(message));
+    error.message = message;
+    return Promise.reject(error);
   }
 );
 

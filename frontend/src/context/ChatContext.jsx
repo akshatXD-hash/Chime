@@ -21,7 +21,8 @@ export const ChatProvider = ({ children }) => {
     if (!userId) return [];
     try {
       const cached = localStorage.getItem(`chime_chats_${userId}`);
-      return cached ? JSON.parse(cached) : [];
+      const parsed = cached ? JSON.parse(cached) : [];
+      return Array.isArray(parsed) ? parsed : [];
     } catch {
       return [];
     }
@@ -49,6 +50,7 @@ export const ChatProvider = ({ children }) => {
   const typingTimeoutMapRef = useRef({});
   const prevSelectedChatIdRef = useRef(null);
   const selectedChatRef = useRef(selectedChat);
+  const chatsRequestRef = useRef(0);
   const processedMessageIdsRef = useRef(new Set());
 
   useEffect(() => {
@@ -70,17 +72,19 @@ export const ChatProvider = ({ children }) => {
   useEffect(() => {
     if (!userId) return;
     if (selectedChat?._id) {
-      localStorage.setItem(`chime_active_chat_${userId}`, String(selectedChat._id));
+      try { localStorage.setItem(`chime_active_chat_${userId}`, String(selectedChat._id)); } catch { /* Storage can be disabled. */ }
     }
   }, [selectedChat?._id, userId]);
 
   // Fetch chats from server
   const loadChats = useCallback(async () => {
     if (!userId) return;
+    const request = ++chatsRequestRef.current;
     setLoadingChats(true);
     setFetchError(null);
     try {
       const data = await chatApi.fetchChats();
+      if (request !== chatsRequestRef.current) return;
       const chatList = Array.isArray(data) ? data : [];
       setChats(chatList);
       setFetchError(null);
@@ -95,7 +99,8 @@ export const ChatProvider = ({ children }) => {
 
       // Check if we can restore the active chat if none currently selected
       if (!selectedChatRef.current && userId) {
-        const savedChatId = localStorage.getItem(`chime_active_chat_${userId}`);
+        let savedChatId;
+        try { savedChatId = localStorage.getItem(`chime_active_chat_${userId}`); } catch { /* Optional cache. */ }
         if (savedChatId) {
           const matchingChat = chatList.find((c) => areIdsEqual(c._id, savedChatId));
           if (matchingChat) {
@@ -105,10 +110,10 @@ export const ChatProvider = ({ children }) => {
       }
     } catch (err) {
       console.warn('Warning fetching chats from server:', err.message);
-      setFetchError(err.message || 'Unable to sync conversations');
+      if (request === chatsRequestRef.current) setFetchError(err.message || 'Unable to sync conversations');
       // Keep existing cached chats in state! Do not wipe state on error!
     } finally {
-      setLoadingChats(false);
+      if (request === chatsRequestRef.current) setLoadingChats(false);
     }
   }, [userId]);
 
@@ -370,7 +375,7 @@ export const ChatProvider = ({ children }) => {
   const clearSelectedChat = () => {
     setSelectedChat(null);
     if (userId) {
-      localStorage.removeItem(`chime_active_chat_${userId}`);
+      try { localStorage.removeItem(`chime_active_chat_${userId}`); } catch { /* Optional cache. */ }
     }
   };
 
