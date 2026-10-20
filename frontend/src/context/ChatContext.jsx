@@ -29,6 +29,15 @@ export const ChatProvider = ({ children }) => {
 
   const [selectedChat, setSelectedChat] = useState(null);
   const [messages, setMessages] = useState([]);
+  const messageCacheRef = useRef(new Map());
+  const updateChatMessages = useCallback((chatId, update) => {
+    const cache = messageCacheRef.current;
+    const next = typeof update === 'function' ? update(cache.get(chatId) || []) : update;
+    cache.delete(chatId);
+    cache.set(chatId, next);
+    if (cache.size > 30) cache.delete(cache.keys().next().value);
+    if (areIdsEqual(selectedChatRef.current?._id, chatId)) setMessages(next);
+  }, []);
   const [loadingChats, setLoadingChats] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [fetchError, setFetchError] = useState(null);
@@ -164,7 +173,7 @@ export const ChatProvider = ({ children }) => {
   useEffect(() => {
     const request = ++messageRequestRef.current;
     const chatId = selectedChat?._id;
-    setMessages([]);
+    setMessages(messageCacheRef.current.get(chatId) || []);
     setMessageError(null);
     if (!chatId) {
       setLoadingMessages(false);
@@ -174,7 +183,7 @@ export const ChatProvider = ({ children }) => {
     setLoadingMessages(true);
     messageApi.getMessages(chatId).then((data) => {
       if (!active || request !== messageRequestRef.current) return;
-      setMessages((current) => {
+      updateChatMessages(chatId, (current) => {
         const merged = new Map((Array.isArray(data) ? data : []).map((m) => [m._id, m]));
         current.forEach((m) => merged.set(m._id, m));
         return [...merged.values()].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
@@ -186,7 +195,7 @@ export const ChatProvider = ({ children }) => {
       if (active) setLoadingMessages(false);
     });
     return () => { active = false; };
-  }, [selectedChat?._id, messageRevision]);
+  }, [selectedChat?._id, messageRevision, updateChatMessages]);
 
   // Cleanup all typing timeouts on unmount
   useEffect(() => {
@@ -223,9 +232,12 @@ export const ChatProvider = ({ children }) => {
       // Play sound for incoming messages
       playNotificationSound();
 
+      if (!areIdsEqual(activeChatId, chatId)) {
+        updateChatMessages(chatId, (prev) => prev.some((m) => areIdsEqual(m._id, messageId)) ? prev : [...prev, newMessage]);
+      }
       // If this message belongs to the currently active chat
       if (activeChatId && areIdsEqual(activeChatId, chatId)) {
-        setMessages((prev) => {
+        updateChatMessages(chatId, (prev) => {
           if (prev.some((m) => areIdsEqual(m._id, newMessage._id))) return prev;
           return [...prev, newMessage];
         });
@@ -364,7 +376,7 @@ export const ChatProvider = ({ children }) => {
     };
 
     // 1. Instant optimistic update
-    setMessages((prev) => [...prev, tempMessage]);
+    updateChatMessages(currentChat._id, (prev) => [...prev, tempMessage]);
     setChats((prev) =>
       prev
         .map((c) =>
@@ -380,7 +392,7 @@ export const ChatProvider = ({ children }) => {
       const message = await messageApi.sendMessage(content, currentChat._id);
 
       // 3. Replace temp message with server response
-      setMessages((prev) =>
+      updateChatMessages(currentChat._id, (prev) =>
         prev.map((m) => (m._id === tempId ? message : m))
       );
 
@@ -403,7 +415,7 @@ export const ChatProvider = ({ children }) => {
       return message;
     } catch (err) {
       // Revert optimistic message on failure
-      setMessages((prev) => prev.filter((m) => m._id !== tempId));
+      updateChatMessages(currentChat._id, (prev) => prev.filter((m) => m._id !== tempId));
       console.error('Failed to send message:', err.message);
       throw err;
     }
