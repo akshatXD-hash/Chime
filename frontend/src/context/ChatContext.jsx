@@ -3,6 +3,7 @@ import { chatApi } from '../api/chatApi';
 import { messageApi } from '../api/messageApi';
 import { useAuth } from './AuthContext';
 import { useSocket } from './SocketContext';
+import { mergeMessage, applyReceipt } from '../utils/messageReceipts';
 import { areIdsEqual } from '../utils/chatUtils';
 
 const ChatContext = createContext(null);
@@ -204,7 +205,7 @@ export const ChatProvider = ({ children }) => {
       if (!active || request !== messageRequestRef.current) return;
       updateChatMessages(chatId, (current) => {
         const merged = new Map((Array.isArray(data) ? data : []).map((m) => [m._id, m]));
-        current.forEach((m) => merged.set(m._id, m));
+        current.forEach((m) => merged.set(m._id, mergeMessage(m, merged.get(m._id) || m)));
         return [...merged.values()].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
       });
       setUnreadMap((prev) => ({ ...prev, [chatId]: 0 }));
@@ -215,6 +216,26 @@ export const ChatProvider = ({ children }) => {
     });
     return () => { active = false; };
   }, [selectedChat?._id, messageRevision, updateChatMessages]);
+
+  const receiveReceipt = useCallback((receipt) => {
+    if (!receipt?.chatId || !Array.isArray(receipt.messageIds) || !receipt.userId) return;
+    updateChatMessages(receipt.chatId, (current) => current.map((message) => applyReceipt(message, receipt)));
+    setChats((current) => current.map((chat) =>
+      areIdsEqual(chat._id, receipt.chatId) && chat.latestMessage?._id
+        ? { ...chat, latestMessage: applyReceipt(chat.latestMessage, receipt) } : chat
+    ));
+  }, [updateChatMessages]);
+
+  const markMessagesRead = useCallback(async (chatId, ids) => {
+    const receipt = await messageApi.markRead(chatId, ids);
+    receiveReceipt(receipt);
+  }, [receiveReceipt]);
+
+  useEffect(() => {
+    if (!socket) return;
+    socket.on('messages-read', receiveReceipt);
+    return () => socket.off('messages-read', receiveReceipt);
+  }, [socket, receiveReceipt]);
 
   // Cleanup all typing timeouts on unmount
   useEffect(() => {
@@ -461,6 +482,7 @@ export const ChatProvider = ({ children }) => {
         loadingMessages,
         messageError,
         retryMessages,
+        markMessagesRead,
         fetchError,
         typingMap,
         unreadMap,

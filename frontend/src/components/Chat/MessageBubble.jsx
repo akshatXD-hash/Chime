@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
-import { Check, Clock } from 'lucide-react';
+import { Check, CheckCheck, Clock } from 'lucide-react';
 
-export const MessageBubble = memo(({ message, isOutgoing, showSenderName, onImageClick }) => {
+export const MessageBubble = memo(({ message, isOutgoing, isRead, showSenderName, onImageClick }) => {
 
   const formatTime = (dateString) => {
     if (!dateString) return '';
@@ -19,7 +19,7 @@ export const MessageBubble = memo(({ message, isOutgoing, showSenderName, onImag
   const isAudioUrl = message.content?.match(/\.(mp3|wav|ogg|m4a)($|\?)/i) || message.content?.startsWith('data:audio/');
 
   return (
-    <div className={`flex flex-col mb-2.5 max-w-[88%] sm:max-w-[78%] md:max-w-[65%] ${isOutgoing ? 'ml-auto items-end' : 'mr-auto items-start'}`}>
+    <div data-message-id={message._id} className={`flex flex-col mb-2.5 max-w-[88%] sm:max-w-[78%] md:max-w-[65%] ${isOutgoing ? 'ml-auto items-end' : 'mr-auto items-start'}`}>
       {/* Sender Name for Group Chats */}
       {!isOutgoing && showSenderName && message.sender?.name && (
         <span className="text-[10px] font-semibold text-devs-indigo mb-1 ml-2 tracking-wide">
@@ -62,7 +62,11 @@ export const MessageBubble = memo(({ message, isOutgoing, showSenderName, onImag
         >
           <span>{formatTime(message.createdAt)}</span>
           {isOutgoing && (
-            message.isOptimistic ? <Clock aria-label="Sending" className="w-3 h-3" /> : <Check aria-label="Sent" className="w-3 h-3" />
+            <span title={message.isOptimistic ? 'Sending' : isRead ? 'Read' : 'Sent'}>
+              {message.isOptimistic ? <Clock aria-label="Sending" className="w-3.5 h-3.5" /> : isRead
+                ? <CheckCheck aria-label="Read" className="w-3.5 h-3.5 text-sky-400" />
+                : <Check aria-label="Sent" className="w-3.5 h-3.5 text-slate-300" />}
+            </span>
           )}
         </div>
       </div>

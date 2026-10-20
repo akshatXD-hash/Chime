@@ -58,6 +58,7 @@ const io = new Server(server, {
   },
   pingTimeout: 60000,
 });
+app.set("io", io);
 const onlineUsersMap = new Map();
 
 io.on("connection", (socket) => {

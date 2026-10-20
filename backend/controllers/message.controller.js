@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Message } from "../models/messageModel.js";
 import { Chat } from "../models/chatModel.js";
 
@@ -64,5 +65,45 @@ export const sendMessage = async (req, res) => {
         return res.status(500).json({
             message: err.message
         });
+    }
+};
+
+export const markMessagesRead = async (req, res) => {
+    const { chatId } = req.params;
+    const { messageIds } = req.body || {};
+    const userId = req.user.id;
+
+    if (!mongoose.isObjectIdOrHexString(chatId) || !Array.isArray(messageIds) ||
+        messageIds.length === 0 || messageIds.length > 100 ||
+        !messageIds.every((id) => mongoose.isObjectIdOrHexString(id))) {
+        return res.status(400).json({ message: "We couldn't update the read status. Please try again." });
+    }
+
+    try {
+        const chat = await Chat.findOne({ _id: chatId, users: userId }).select("users");
+        if (!chat) {
+            return res.status(403).json({ message: "You no longer have access to this conversation." });
+        }
+
+        const messages = await Message.find({
+            _id: { $in: messageIds },
+            chat: chatId,
+            sender: { $ne: userId }
+        }).select("_id");
+        const ids = messages.map((message) => message._id.toString());
+
+        if (ids.length) {
+            await Message.updateMany(
+                { _id: { $in: ids }, chat: chatId },
+                { $addToSet: { readBy: userId } }
+            );
+            const receipt = { chatId, messageIds: ids, userId };
+            req.app.get("io")?.to(chat.users.map((id) => id.toString())).emit("messages-read", receipt);
+        }
+
+        return res.json({ chatId, messageIds: ids, userId });
+    } catch (err) {
+        console.error("Could not update read status:", err);
+        return res.status(500).json({ message: "We couldn't update the read status. Please try again." });
     }
 };
