@@ -30,6 +30,7 @@ export const ChatProvider = ({ children }) => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [messages, setMessages] = useState([]);
   const messageCacheRef = useRef(new Map());
+  const draftsRef = useRef(new Map());
   const updateChatMessages = useCallback((chatId, update) => {
     const cache = messageCacheRef.current;
     const next = typeof update === 'function' ? update(cache.get(chatId) || []) : update;
@@ -437,6 +438,7 @@ export const ChatProvider = ({ children }) => {
   return (
     <ChatContext.Provider
       value={{
+        draftsRef,
         chats,
         setChats,
         selectedChat,

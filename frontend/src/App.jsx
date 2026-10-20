@@ -119,7 +119,7 @@ const MainLayout = () => {
               onStartCall={handleStartCall}
             />
             <MessageList />
-            <MessageInput />
+            <MessageInput key={selectedChat._id} />
           </>
         ) : (
           /* Empty Chat Selection Screen */
