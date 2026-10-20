@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 
@@ -52,15 +52,6 @@ export const SocketProvider = ({ children }) => {
       setConnectionStatus('connecting');
     });
 
-    newSocket.io.on('reconnect', () => {
-      console.log('Socket reconnected');
-      setSocketConnected(true);
-      setConnectionStatus('connected');
-      if (userRef.current) {
-        newSocket.emit('setup', userRef.current);
-      }
-    });
-
     newSocket.on('connected', () => {
       setSocketConnected(true);
       setConnectionStatus('connected');
@@ -79,6 +70,7 @@ export const SocketProvider = ({ children }) => {
     newSocket.on('disconnect', (reason) => {
       console.log('Socket disconnected:', reason);
       setSocketConnected(false);
+      setOnlineUsers([]);
       setConnectionStatus('disconnected');
     });
 
@@ -95,7 +87,7 @@ export const SocketProvider = ({ children }) => {
   }, [user?._id]);
 
   // Audio notification generator using Web Audio API
-  const playNotificationSound = () => {
+  const playNotificationSound = useCallback(() => {
     try {
       const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
       if (!AudioCtxClass) return;
@@ -109,12 +101,13 @@ export const SocketProvider = ({ children }) => {
       gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.22);
       osc.connect(gain);
       gain.connect(audioCtx.destination);
+      osc.onended = () => { audioCtx.close().catch(() => {}); };
       osc.start();
       osc.stop(audioCtx.currentTime + 0.22);
     } catch {
       // Ignore autoplay/audio errors on restricted browsers
     }
-  };
+  }, []);
 
   return (
     <SocketContext.Provider

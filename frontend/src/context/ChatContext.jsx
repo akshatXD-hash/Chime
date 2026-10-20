@@ -143,11 +143,24 @@ export const ChatProvider = ({ children }) => {
     }
   }, [userId, loadChats]);
 
-  // Join socket chat room immediately when selectedChat or socket changes
+  // Rejoin rooms and catch up on messages missed while disconnected.
   useEffect(() => {
-    if (socket && selectedChat?._id) {
-      socket.emit('join-chat', selectedChat._id);
-    }
+    if (!socket) return;
+    const reconnect = () => {
+      if (selectedChatRef.current?._id) socket.emit('join-chat', selectedChatRef.current._id);
+      loadChats();
+      setMessageRevision((n) => n + 1);
+    };
+    socket.on('connect', reconnect);
+    window.addEventListener('online', reconnect);
+    return () => {
+      socket.off('connect', reconnect);
+      window.removeEventListener('online', reconnect);
+    };
+  }, [socket, loadChats]);
+
+  useEffect(() => {
+    if (socket?.connected && selectedChat?._id) socket.emit('join-chat', selectedChat._id);
   }, [selectedChat?._id, socket]);
 
   // Clear typing state when switching chats
