@@ -52,7 +52,7 @@ export const ChatHeader = ({ onToggleDetails, onBackMobile, onStartCall }) => {
           className="relative w-10 h-10 rounded-2xl bg-devs-card border border-devs-border overflow-hidden flex items-center justify-center font-semibold text-devs-indigo cursor-pointer flex-shrink-0 shadow-subtle hover:border-devs-blue/50 transition-colors"
         >
           {isGroup ? (
-            <div className="w-full h-full bg-gradient-to-br from-indigo-600 to-violet-700 flex items-center justify-center text-white">
+            <div className="w-full h-full bg-devs-blue flex items-center justify-center text-white">
               <GroupIcon className="w-5 h-5" />
             </div>
           ) : avatarPic ? (

@@ -14,7 +14,7 @@ export const NavRail = ({ activeTab, setActiveTab, onOpenProfile, onOpenSettings
       {/* Top / Left Section - Logo Brand Mark */}
       <div className="flex flex-row md:flex-col items-center space-x-3 md:space-x-0 md:space-y-6">
         <div 
-          className="w-9 h-9 md:w-10 md:h-10 rounded-2xl bg-gradient-to-br from-devs-blue to-devs-indigo flex items-center justify-center shadow-glow-blue cursor-pointer transition-transform active:scale-95" 
+          className="w-9 h-9 md:w-10 md:h-10 rounded-2xl bg-devs-blue flex items-center justify-center  cursor-pointer transition-transform active:scale-95" 
           title="Chime Workspace"
         >
           <MessageSquare className="w-4 h-4 md:w-5 md:h-5 text-white" />

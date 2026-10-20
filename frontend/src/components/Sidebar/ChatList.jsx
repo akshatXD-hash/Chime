@@ -271,7 +271,7 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
                 <div className="relative flex-shrink-0">
                   <div className="w-11 h-11 rounded-2xl bg-devs-card border border-devs-border overflow-hidden flex items-center justify-center font-semibold text-devs-indigo text-base shadow-subtle">
                     {details.isGroup ? (
-                      <div className="w-full h-full bg-gradient-to-br from-indigo-600 to-violet-700 flex items-center justify-center text-white">
+                      <div className="w-full h-full bg-devs-blue flex items-center justify-center text-white">
                         <GroupIcon className="w-5 h-5" />
                       </div>
                     ) : details.pic ? (

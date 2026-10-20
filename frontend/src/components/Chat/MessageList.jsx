@@ -144,7 +144,7 @@ export const MessageList = () => {
       {lightboxImage && (
         <div
           onClick={() => setLightboxImage(null)}
-          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 cursor-zoom-out animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 bg-black/90  flex items-center justify-center p-4 cursor-zoom-out animate-in fade-in duration-150"
         >
           <button
             aria-label="Close image preview"

@@ -128,7 +128,7 @@ export const ChatDetailsSidebar = ({ isOpen, onClose }) => {
           <div className="flex flex-col items-center text-center">
             <div className="w-20 h-20 rounded-2xl bg-devs-card border border-devs-border overflow-hidden flex items-center justify-center font-bold text-xl text-devs-indigo shadow-subtle mb-3">
               {isGroup ? (
-                <div className="w-full h-full bg-gradient-to-br from-indigo-600 to-violet-700 flex items-center justify-center text-white">
+                <div className="w-full h-full bg-devs-blue flex items-center justify-center text-white">
                   <GroupIcon className="w-10 h-10" />
                 </div>
               ) : targetUser?.pic ? (

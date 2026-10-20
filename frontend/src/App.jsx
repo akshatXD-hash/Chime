@@ -124,7 +124,6 @@ const MainLayout = () => {
         ) : (
           /* Empty Chat Selection Screen */
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-devs-bg relative overflow-hidden select-none">
-            <div className="absolute inset-0 bg-[radial-gradient(#1F2942_1px,transparent_1px)] [background-size:32px_32px] opacity-20 pointer-events-none" />
 
             <div className="w-16 h-16 rounded-3xl bg-devs-surface border border-devs-border flex items-center justify-center shadow-card-dark mb-5 text-devs-indigo">
               <MessageSquare className="w-8 h-8" />

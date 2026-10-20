@@ -26,7 +26,7 @@ export const CallModal = ({ isOpen, callType, contactName, contactPic, onClose }
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-devs-bg/95 backdrop-blur-xl flex flex-col items-center justify-between p-8 select-none">
+    <div className="fixed inset-0 z-50 bg-devs-bg/95  flex flex-col items-center justify-between p-8 select-none">
       {/* Top Header */}
       <div className="flex flex-col items-center text-center space-y-2 mt-8">
         <span className="text-xs uppercase font-bold tracking-widest text-devs-cyan animate-pulse">
@@ -47,13 +47,13 @@ export const CallModal = ({ isOpen, callType, contactName, contactPic, onClose }
                 {contactName?.charAt(0)}
               </div>
             )}
-            <div className="absolute bottom-4 right-4 w-28 h-20 rounded-xl bg-black/60 border border-white/20 backdrop-blur-md flex items-center justify-center text-xs text-white">
+            <div className="absolute bottom-4 right-4 w-28 h-20 rounded-xl bg-black/60 border border-white/20  flex items-center justify-center text-xs text-white">
               Self Camera
             </div>
           </div>
         ) : (
           <div className="flex flex-col items-center space-y-4">
-            <div className="w-32 h-32 rounded-full bg-devs-blue/20 border-2 border-devs-blue flex items-center justify-center font-bold text-4xl text-devs-blue shadow-glow-blue animate-pulse">
+            <div className="w-32 h-32 rounded-full bg-devs-blue/20 border-2 border-devs-blue flex items-center justify-center font-bold text-4xl text-devs-blue  animate-pulse">
               {contactPic ? (
                 <img src={contactPic} alt={contactName} className="w-full h-full rounded-full object-cover" />
               ) : (
