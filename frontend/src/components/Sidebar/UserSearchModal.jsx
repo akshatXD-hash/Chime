@@ -1,3 +1,4 @@
+import { useDialog } from '../../hooks/useDialog';
 import React, { useState, useEffect, useRef } from 'react';
 import { userApi } from '../../api/userApi';
 import { useChat } from '../../context/ChatContext';
@@ -43,6 +44,8 @@ export const UserSearchModal = ({ isOpen, onClose }) => {
     };
   }, [isOpen]);
 
+  const dialogRef = useDialog(isOpen, onClose);
+
   if (!isOpen) return null;
 
   const handleQueryChange = (e) => {
@@ -86,7 +89,7 @@ export const UserSearchModal = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/75  flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-150">
-      <div className="w-full max-w-md bg-devs-surface border-t sm:border border-devs-border/80 rounded-t-3xl sm:rounded-3xl shadow-card-dark p-5 sm:p-6 overflow-hidden relative animate-in slide-in-from-bottom-5 sm:zoom-in-95 duration-200">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="New conversation" tabIndex={-1} className="max-h-[90dvh] overflow-y-auto w-full max-w-md bg-devs-surface border-t sm:border border-devs-border/80 rounded-t-3xl sm:rounded-3xl shadow-card-dark p-5 sm:p-6 overflow-hidden relative animate-in slide-in-from-bottom-5 sm:zoom-in-95 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between pb-3.5 border-b border-devs-border/80 mb-4">
           <div className="flex items-center gap-2">
@@ -94,6 +97,7 @@ export const UserSearchModal = ({ isOpen, onClose }) => {
             <h3 className="text-sm font-bold text-white">Start New Conversation</h3>
           </div>
           <button
+            aria-label="Close dialog"
             onClick={onClose}
             className="p-1 rounded-lg text-devs-textMuted hover:text-white hover:bg-devs-hover transition-colors"
           >
