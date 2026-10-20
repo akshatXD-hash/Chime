@@ -1,4 +1,4 @@
-import React, { useState, Component } from 'react';
+import React, { useState, useEffect, Component } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SocketProvider, useSocket } from './context/SocketContext';
 import { ChatProvider, useChat } from './context/ChatContext';
@@ -65,13 +65,18 @@ const MainLayout = () => {
   const { selectedChat, clearSelectedChat } = useChat();
   const { connectionStatus } = useSocket();
 
-  const [activeTab, setActiveTab] = useState('chats');
+
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isCallOpen, setIsCallOpen] = useState(false);
   const [callType, setCallType] = useState('audio'); // 'audio' | 'video'
+
+  useEffect(() => {
+    setIsDetailsOpen(false);
+    setIsCallOpen(false);
+  }, [selectedChat?._id]);
 
   const currentUserId = user?._id || user?.id;
   const targetUser = selectedChat && !selectedChat.isGroupChat
@@ -87,14 +92,13 @@ const MainLayout = () => {
     <div className="flex flex-col md:flex-row h-screen h-[100dvh] w-screen bg-devs-bg overflow-hidden text-devs-text select-none relative">
       {/* 1. Left Vertical Nav Rail / Mobile Bottom Bar */}
       <NavRail
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        hiddenOnMobile={Boolean(selectedChat)}
         onOpenProfile={() => setIsProfileModalOpen(true)}
         onOpenSettings={() => setIsProfileModalOpen(true)}
       />
 
       {/* 2. Middle Column: Chat List Sidebar */}
-      <div className={`${selectedChat ? 'hidden md:flex' : 'flex'} flex-1 md:flex-initial h-full flex-shrink-0 w-full md:w-auto overflow-hidden`}>
+      <div className={`${selectedChat ? 'hidden md:flex' : 'flex'} flex-1 min-h-0 md:flex-initial md:h-full flex-shrink-0 w-full md:w-auto overflow-hidden`}>
         <ChatList
           onOpenSearchModal={() => setIsSearchModalOpen(true)}
           onOpenGroupModal={() => setIsGroupModalOpen(true)}
@@ -102,12 +106,12 @@ const MainLayout = () => {
       </div>
 
       {/* 3. Main Active Chat Window */}
-      <div className={`flex-1 flex flex-col h-full min-w-0 ${!selectedChat ? 'hidden md:flex' : 'flex'}`}>
+      <div className={`flex-1 flex flex-col min-h-0 md:h-full min-w-0 ${!selectedChat ? 'hidden md:flex' : 'flex'}`}>
         {/* Subtle Reconnecting Banner */}
-        {connectionStatus === 'connecting' && (
+        {connectionStatus !== 'connected' && (
           <div className="bg-devs-blue/15 border-b border-devs-blue/30 px-3 py-1 text-center text-[11px] text-devs-indigo font-medium flex items-center justify-center gap-1.5 animate-pulse">
             <span className="w-1.5 h-1.5 rounded-full bg-devs-indigo animate-ping" />
-            <span>Connecting to real-time server...</span>
+            <span>{connectionStatus === 'connecting' ? 'Reconnecting…' : 'Live updates are offline. Messages will sync when you reconnect.'}</span>
           </div>
         )}
 
@@ -116,7 +120,6 @@ const MainLayout = () => {
             <ChatHeader
               onToggleDetails={() => setIsDetailsOpen(!isDetailsOpen)}
               onBackMobile={clearSelectedChat}
-              onStartCall={handleStartCall}
             />
             <MessageList />
             <MessageInput key={selectedChat._id} />
@@ -129,10 +132,10 @@ const MainLayout = () => {
               <MessageSquare className="w-8 h-8" />
             </div>
             <h1 className="text-2xl font-bold text-white tracking-tight mb-1.5">
-              Welcome to <span className="devs-gradient-text">Chime</span>
+              A little closer, with <span className="devs-gradient-text">Chime</span>
             </h1>
             <p className="text-xs text-devs-textSecondary max-w-sm mb-6 leading-relaxed">
-              Select an existing chat from the left panel or start a new conversation to begin messaging in real-time.
+              Pick a conversation or say hello to someone new.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3">
               <button
@@ -140,7 +143,7 @@ const MainLayout = () => {
                 className="px-5 py-2.5 rounded-xl bg-devs-blue hover:bg-devs-blueHover text-white font-semibold text-xs transition-colors shadow-subtle flex items-center gap-2"
               >
                 <MessageSquare className="w-3.5 h-3.5" />
-                <span>Start New Conversation</span>
+                <span>New conversation</span>
               </button>
               <button
                 onClick={() => setIsGroupModalOpen(true)}
@@ -154,7 +157,7 @@ const MainLayout = () => {
       </div>
 
       {/* 4. Right Collapsible Chat Details Drawer */}
-      <ChatDetailsSidebar isOpen={isDetailsOpen} onClose={() => setIsDetailsOpen(false)} />
+      <ChatDetailsSidebar key={selectedChat?._id} isOpen={isDetailsOpen} onClose={() => setIsDetailsOpen(false)} />
 
       {/* Modals */}
       <UserSearchModal isOpen={isSearchModalOpen} onClose={() => setIsSearchModalOpen(false)} />

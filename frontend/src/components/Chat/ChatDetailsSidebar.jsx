@@ -105,10 +105,10 @@ export const ChatDetailsSidebar = ({ isOpen, onClose }) => {
       {/* Backdrop overlay on mobile */}
       <div 
         onClick={onClose} 
-        className="fixed inset-0 bg-black/60 backdrop-blur-xs z-30 md:hidden animate-in fade-in duration-200" 
+        className="fixed inset-0 bg-black/60 backdrop-blur-xs z-30 xl:hidden animate-in fade-in duration-200" 
       />
 
-      <div className="fixed md:static inset-y-0 right-0 z-40 w-full sm:w-80 md:w-96 h-full bg-devs-surface/95 border-l border-devs-border/80 flex flex-col flex-shrink-0 select-none animate-in slide-in-from-right duration-200 shadow-card-dark md:shadow-none">
+      <div className="fixed xl:static inset-y-0 right-0 z-40 w-full sm:w-80 xl:w-80 h-full bg-devs-surface/95 border-l border-devs-border/80 flex flex-col flex-shrink-0 select-none animate-in slide-in-from-right duration-200 shadow-card-dark xl:shadow-none">
         {/* Header */}
         <div className="px-4 py-3.5 border-b border-devs-border/80 flex items-center justify-between">
           <h3 className="text-xs font-bold text-white flex items-center gap-2">

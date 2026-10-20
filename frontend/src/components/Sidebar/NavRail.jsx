@@ -3,14 +3,14 @@ import { MessageSquare, Settings, LogOut, User as UserIcon } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
 
-export const NavRail = ({ activeTab, setActiveTab, onOpenProfile, onOpenSettings }) => {
+export const NavRail = ({ hiddenOnMobile, onOpenProfile, onOpenSettings }) => {
   const { user, logout } = useAuth();
   const { socketConnected, connectionStatus } = useSocket();
 
   const isConnected = socketConnected || connectionStatus === 'connected';
 
   return (
-    <div className="w-full md:w-16 lg:w-20 h-14 md:h-full bg-devs-surface/95 border-t md:border-t-0 md:border-r border-devs-border/80 flex flex-row md:flex-col items-center justify-between px-4 py-2 md:px-0 md:py-5 select-none z-30 flex-shrink-0 order-last md:order-first">
+    <div className={`${hiddenOnMobile ? 'hidden md:flex' : 'flex'} w-full md:w-16 lg:w-20 h-14 md:h-full bg-devs-surface/95 border-t md:border-t-0 md:border-r border-devs-border/80 flex flex-row md:flex-col items-center justify-between px-4 py-2 md:px-0 md:py-5 select-none z-30 flex-shrink-0 order-last md:order-first`}>
       {/* Top / Left Section - Logo Brand Mark */}
       <div className="flex flex-row md:flex-col items-center space-x-3 md:space-x-0 md:space-y-6">
         <div 
@@ -52,7 +52,7 @@ export const NavRail = ({ activeTab, setActiveTab, onOpenProfile, onOpenSettings
         </button>
 
         <button
-          onClick={logout}
+          onClick={() => logout()}
           title="Sign Out"
           className="w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center text-red-400/80 hover:bg-red-500/10 hover:text-red-400 transition-colors"
         >

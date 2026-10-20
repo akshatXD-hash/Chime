@@ -91,7 +91,7 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
   };
 
   return (
-    <div className="w-full md:w-80 lg:w-96 h-full bg-devs-surface/90 border-r border-devs-border/80 flex flex-col z-10 flex-shrink-0 select-none overflow-hidden">
+    <div className="w-full md:w-80 lg:w-[340px] h-full bg-devs-surface/90 border-r border-devs-border/80 flex flex-col z-10 flex-shrink-0 select-none overflow-hidden">
       {/* Header */}
       <div className="px-4 py-3.5 border-b border-devs-border/80 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -107,6 +107,7 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
         <div className="flex items-center gap-1">
           <button
             onClick={loadChats}
+            disabled={loadingChats}
             title="Refresh conversations"
             className="p-2 rounded-xl text-devs-textSecondary hover:text-white hover:bg-devs-hover transition-colors"
           >
@@ -153,11 +154,13 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Search conversations"
             placeholder="Search conversations..."
             className="w-full pl-10 pr-9 py-2 rounded-xl glass-input text-xs"
           />
           {searchQuery && (
             <button
+              aria-label="Clear search"
               onClick={() => setSearchQuery('')}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-devs-textMuted hover:text-white p-0.5"
             >
@@ -209,7 +212,7 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
         {!loadingChats && chats.length > 0 && filteredChats.length === 0 && (
           <div className="p-8 text-center text-xs text-devs-textMuted flex flex-col items-center gap-2">
             <Search className="w-7 h-7 text-devs-textMuted/40" />
-            <p>No conversations matching &quot;{searchQuery}&quot;</p>
+            <p>{searchQuery ? `No conversations matching “${searchQuery}”` : filterTab === 'unread' ? 'You’re all caught up.' : 'No group conversations yet.'}</p>
             <button
               onClick={() => {
                 setSearchQuery('');
@@ -257,12 +260,14 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
             onlineUsers.some((uid) => areIdsEqual(uid, details.id));
 
           return (
-            <div
+            <button
+              type="button"
+              aria-pressed={Boolean(isSelected)}
               key={chat._id}
               onClick={() => setSelectedChat(chat)}
-              className={`p-3 flex items-center justify-between cursor-pointer transition-all ${
+              className={`w-full text-left px-4 py-4 border-l-2 border-transparent flex items-center justify-between cursor-pointer transition-all ${
                 isSelected
-                  ? 'bg-devs-active border-l-2 border-devs-indigo'
+                  ? 'bg-devs-active !border-devs-indigo'
                   : 'hover:bg-devs-hover/70'
               }`}
             >
@@ -293,7 +298,7 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
                 {/* Info & Last message */}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-semibold text-white truncate flex items-center gap-1.5">
+                    <h3 className="text-sm font-semibold text-white truncate flex items-center gap-1.5">
                       <span className="truncate">{details.name}</span>
                       {details.isGroup && (
                         <span className="text-[10px] px-1.5 py-0.2 rounded bg-devs-indigo/15 text-devs-indigo font-normal flex-shrink-0">
@@ -309,11 +314,11 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
                   </div>
 
                   <div className="flex items-center justify-between mt-0.5">
-                    <p className="text-[11px] text-devs-textSecondary truncate max-w-[180px]">
+                    <p className="text-sm text-devs-textSecondary truncate">
                       {latestMsg
                         ? typeof latestMsg === 'string'
                           ? latestMsg
-                          : `${latestMsg.sender?.name ? latestMsg.sender.name.split(' ')[0] + ': ' : ''}${latestMsg.content || ''}`
+                          : `${latestMsg.sender?.name ? latestMsg.sender.name.split(' ')[0] + ': ' : ''}${latestMsg.content?.startsWith('data:image/') || /\.(png|jpe?g|gif|webp)($|\?)/i.test(latestMsg.content || '') ? 'Image' : latestMsg.content || ''}`
                         : details.isGroup
                         ? `${details.membersCount} members`
                         : 'No messages yet'}
@@ -327,7 +332,7 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
                   </div>
                 </div>
               </div>
-            </div>
+            </button>
           );
         })}
       </div>
