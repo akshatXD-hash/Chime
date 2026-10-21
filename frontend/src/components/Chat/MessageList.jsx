@@ -1,3 +1,4 @@
+import { useReadReceipts } from '../../hooks/useReadReceipts';
 import React, { useRef, useEffect, useState } from 'react';
 import { useChat, areIdsEqual } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
@@ -47,53 +48,8 @@ export const MessageList = () => {
     return () => window.removeEventListener('keydown', close);
   }, [lightboxImage]);
 
-  useEffect(() => {
-    const chatId = selectedChat?._id;
-    if (!chatId || lightboxImage) return;
-    const unread = new Set(messages.filter((message) =>
-      !message.isOptimistic && !areIdsEqual(message.sender, currentUserId) &&
-      !(message.readBy || []).some((id) => areIdsEqual(id, currentUserId))
-    ).map((message) => String(message._id)));
-    if (!unread.size) return;
-    const visible = new Set();
-    let pending = false;
-    let retryAfter = 0;
-    let active = true;
-    const flush = async () => {
-      if (!active || pending || Date.now() < retryAfter || document.visibilityState !== 'visible' || !document.hasFocus() || document.querySelector('[aria-modal="true"]')) return;
-      const ids = [...visible].filter((id) => unread.has(id)).slice(0, 100);
-      if (!ids.length) return;
-      pending = true;
-      try {
-        await markMessagesRead(chatId, ids);
-        ids.forEach((id) => unread.delete(id));
-      } catch {
-        retryAfter = Date.now() + 10000;
-      } finally {
-        pending = false;
-      }
-    };
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        const id = entry.target.dataset.messageId;
-        if (entry.isIntersecting) visible.add(id);
-        else visible.delete(id);
-      });
-    }, { root: scrollRef.current, threshold: 0.1 });
-    scrollRef.current?.querySelectorAll('[data-message-id]').forEach((node) => {
-      if (unread.has(node.dataset.messageId)) observer.observe(node);
-    });
-    const timer = setInterval(flush, 700);
-    window.addEventListener('focus', flush);
-    document.addEventListener('visibilitychange', flush);
-    return () => {
-      active = false;
-      clearInterval(timer);
-      observer.disconnect();
-      window.removeEventListener('focus', flush);
-      document.removeEventListener('visibilitychange', flush);
-    };
-  }, [messages, selectedChat?._id, currentUserId, markMessagesRead, lightboxImage]);
+  useReadReceipts({ messages, chatId: selectedChat?._id, userId: currentUserId,
+    rootRef: scrollRef, markRead: markMessagesRead, paused: Boolean(lightboxImage) });
 
   // Group messages by date
   const getDateLabel = (dateString) => {
