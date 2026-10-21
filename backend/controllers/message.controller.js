@@ -5,10 +5,14 @@ import { Chat } from "../models/chatModel.js";
 export const getMessages = async (req, res) => {
     try {
         const { chatId } = req.params;
+        if (!mongoose.isObjectIdOrHexString(chatId)) return res.status(400).json({ message: "Please choose a valid conversation." });
+        if (!await Chat.exists({ _id: chatId, users: req.user.id })) {
+            return res.status(403).json({ message: "You no longer have access to this conversation." });
+        }
 
         const messages = await Message.find({
             chat: chatId
-        })
+        }).sort({ createdAt: 1, _id: 1 })
             .populate("sender", "-password")
             .populate({
                 path: "chat",
@@ -32,12 +36,15 @@ export const sendMessage = async (req, res) => {
     try {
         const { content, chatId } = req.body;
 
-        if (!content || !chatId) {
+        if (typeof content !== "string" || !content.trim() || !mongoose.isObjectIdOrHexString(chatId)) {
             return res.status(400).json({
                 message: "Content and Chat ID are required"
             });
         }
 
+        if (!await Chat.exists({ _id: chatId, users: req.user.id })) {
+            return res.status(403).json({ message: "You no longer have access to this conversation." });
+        }
         const message = await Message.create({
             sender: req.user.id,
             content,
