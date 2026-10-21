@@ -1,3 +1,4 @@
+import { getSession, saveSession, clearSession } from '../utils/session';
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { SESSION_EXPIRED } from '../utils/errorMessages';
 import { authApi } from '../api/authApi';
@@ -5,38 +6,15 @@ import { authApi } from '../api/authApi';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    try {
-      const savedUser = localStorage.getItem('chime_user');
-      const savedToken = localStorage.getItem('chime_token');
-      // If token is missing, consider session invalid
-      if (savedUser && savedToken) {
-        return JSON.parse(savedUser);
-      }
-      return null;
-    } catch {
-      return null;
-    }
-  });
+  const [user, setUser] = useState(() => getSession()?.user || null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [authNotice, setAuthNotice] = useState(null);
 
-  // Sync user object with localStorage
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem('chime_user', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('chime_user');
-      localStorage.removeItem('chime_token');
-    }
-  }, [user]);
-
   const logout = useCallback((reason = null) => {
     setUser(null);
-    localStorage.removeItem('chime_user');
-    localStorage.removeItem('chime_token');
+    clearSession();
     setAuthNotice(typeof reason === 'string' ? reason : null);
   }, []);
 
@@ -60,9 +38,7 @@ export const AuthProvider = ({ children }) => {
     setAuthNotice(null);
     try {
       const data = await authApi.signIn({ email, password });
-      if (data.token) {
-        localStorage.setItem('chime_token', data.token);
-      }
+      saveSession({ user: data.user, token: data.token });
       setUser(data.user);
       return data.user;
     } catch (err) {
@@ -79,9 +55,7 @@ export const AuthProvider = ({ children }) => {
     setAuthNotice(null);
     try {
       const data = await authApi.signUp(formData);
-      if (data.token) {
-        localStorage.setItem('chime_token', data.token);
-      }
+      saveSession({ user: data.user, token: data.token });
       setUser(data.user);
       return data.user;
     } catch (err) {
@@ -96,7 +70,7 @@ export const AuthProvider = ({ children }) => {
     setUser((prevUser) => {
       if (!prevUser) return null;
       const updated = { ...prevUser, pic: newPicUrl };
-      localStorage.setItem('chime_user', JSON.stringify(updated));
+      saveSession({ ...getSession(), user: updated });
       return updated;
     });
   };
