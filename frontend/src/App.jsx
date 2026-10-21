@@ -166,7 +166,7 @@ const AuthWrapper = () => {
   }
 
   return (
-    <SocketProvider>
+    <SocketProvider key={user._id || user.id}>
       <ChatProvider>
         <MainLayout />
       </ChatProvider>

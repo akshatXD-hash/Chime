@@ -32,7 +32,12 @@ axiosClient.interceptors.request.use(
 );
 
 axiosClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (response.config.sessionToken && response.config.sessionToken !== getSession()?.token) {
+      return Promise.reject(new axios.CanceledError('The signed-in account changed.'));
+    }
+    return response;
+  },
   (error) => {
     const status = error.response?.status;
     const message = getErrorMessage(error);
