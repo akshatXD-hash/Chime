@@ -169,7 +169,8 @@ export const MessageList = () => {
               isOutgoing={isOutgoing}
               isDelivered={isMessageDelivered(message, selectedChat?.users)}
               isRead={isMessageRead(message, selectedChat?.users)}
-              showSenderName={Boolean(selectedChat?.isGroupChat)}
+              showSenderName={true}
+              senderName={message.sender?.name || selectedChat?.users?.find((member) => areIdsEqual(member, senderId))?.name || 'Unknown sender'}
               onImageClick={(url) => setLightboxImage(url)}
             />
           </React.Fragment>

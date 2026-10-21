@@ -1,7 +1,8 @@
+import { Avatar } from '../Common/Avatar';
 import React, { memo } from 'react';
 import { Check, CheckCheck, Clock } from 'lucide-react';
 
-export const MessageBubble = memo(({ message, isOutgoing, isRead, isDelivered, showSenderName, onImageClick }) => {
+export const MessageBubble = memo(({ message, isOutgoing, isRead, isDelivered, senderName, showSenderName, onImageClick }) => {
 
   const formatTime = (dateString) => {
     if (!dateString) return '';
@@ -20,11 +21,11 @@ export const MessageBubble = memo(({ message, isOutgoing, isRead, isDelivered, s
 
   return (
     <div data-message-id={message._id} data-direction={isOutgoing ? 'outgoing' : 'incoming'} className={`message-row flex w-full min-w-0 flex-col ${isOutgoing ? 'items-end' : 'items-start'}`}>
-      {/* Sender Name for Group Chats */}
-      {!isOutgoing && showSenderName && message.sender?.name && (
-        <span className="text-[10px] font-semibold text-devs-indigo mb-1 ml-2 tracking-wide">
-          {message.sender.name}
-        </span>
+      {showSenderName && (
+        <div className="mb-1.5 flex items-center gap-2 text-xs text-devs-textSecondary">
+          {!isOutgoing && <span className="h-6 w-6 overflow-hidden rounded-full"><Avatar src={message.sender?.pic} name={senderName} /></span>}
+          <span className="font-semibold">{isOutgoing ? 'You' : senderName}</span>
+        </div>
       )}
 
       {/* Message Bubble Container */}
