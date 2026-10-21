@@ -76,7 +76,7 @@ export const sendMessage = async (req, res) => {
     }
 };
 
-export const markMessagesRead = async (req, res) => {
+const updateReceipt = async (req, res, kind) => {
     const { chatId } = req.params;
     const { messageIds } = req.body || {};
     const userId = req.user.id;
@@ -103,15 +103,18 @@ export const markMessagesRead = async (req, res) => {
         if (ids.length) {
             await Message.updateMany(
                 { _id: { $in: ids }, chat: chatId },
-                { $addToSet: { readBy: userId } }
+                { $addToSet: kind === "read" ? { readBy: userId, deliveredTo: userId } : { deliveredTo: userId } }
             );
-            const receipt = { chatId, messageIds: ids, userId };
-            req.app.get("io")?.to(chat.users.map((id) => id.toString())).emit("messages-read", receipt);
+            const receipt = { chatId, messageIds: ids, userId, kind };
+            req.app.get("io")?.to(chat.users.map((id) => id.toString())).emit(kind === "read" ? "messages-read" : "messages-delivered", receipt);
         }
 
-        return res.json({ chatId, messageIds: ids, userId });
+        return res.json({ chatId, messageIds: ids, userId, kind });
     } catch (err) {
         console.error("Could not update read status:", err);
         return res.status(500).json({ message: "We couldn't update the read status. Please try again." });
     }
 };
+
+export const markMessagesRead = (req, res) => updateReceipt(req, res, "read");
+export const markMessagesDelivered = (req, res) => updateReceipt(req, res, "delivered");
