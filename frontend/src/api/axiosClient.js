@@ -1,3 +1,4 @@
+import { getSession } from '../utils/session';
 import axios from 'axios';
 import { getErrorMessage, SESSION_EXPIRED } from '../utils/errorMessages';
 
@@ -5,14 +6,14 @@ const BASE_URL = import.meta.env.VITE_API_URL || 'https://chime-gjoi.onrender.co
 
 export const axiosClient = axios.create({
   baseURL: BASE_URL,
-  withCredentials: true,
+  withCredentials: false,
   timeout: 20000, // 20s timeout to accommodate cold starts gracefully
 });
 
 axiosClient.interceptors.request.use(
   (config) => {
-    let token;
-    try { token = localStorage.getItem('chime_token'); } catch { /* Cookie authentication can still work. */ }
+    const token = getSession()?.token;
+    config.sessionToken = token;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -37,7 +38,7 @@ axiosClient.interceptors.response.use(
     const message = getErrorMessage(error);
 
     // Handle token expiry / 401 Unauthorized
-    if (status === 401 && !/\/api\/auth\/(signin|signup)/.test(error.config?.url || '')) {
+    if (status === 401 && error.config?.sessionToken === getSession()?.token && !/\/api\/auth\/(signin|signup)/.test(error.config?.url || '')) {
       // Dispatch custom event so AuthContext can cleanly handle logout and show notification
       window.dispatchEvent(
         new CustomEvent('chime:auth-expired', {
