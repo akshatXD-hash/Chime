@@ -18,8 +18,8 @@
 .devs-gradient-btn { background: #287D62; transition: background .15s; }
 .devs-gradient-btn:hover { background: #226B54; }
 .devs-gradient-text { color: #92CEB7; }
-.bubble-incoming { background: #242B29; color: #F8FAFC; }
-.bubble-outgoing { background: #285B48; color: #FFFFFF; }
+.bubble-incoming { background: #2C3439; border: 1px solid #44515A; color: #F8FAFC; }
+.bubble-outgoing { background: #23674F; border: 1px solid #398668; color: #FFFFFF; }
 .message-list { user-select: text; overscroll-behavior: contain; scrollbar-gutter: stable; }
 .composer-tool { width: 40px; height: 44px; display: grid; place-items: center; border-radius: 10px; color: #B2BDB7; flex-shrink: 0; }
 .composer-tool:hover { background: #2B3431; color: white; }

@@ -19,7 +19,7 @@ export const MessageBubble = memo(({ message, isOutgoing, isRead, isDelivered, s
   const isAudioUrl = message.content?.match(/\.(mp3|wav|ogg|m4a)($|\?)/i) || message.content?.startsWith('data:audio/');
 
   return (
-    <div data-message-id={message._id} className={`flex flex-col mb-2.5 max-w-[88%] sm:max-w-[78%] md:max-w-[65%] ${isOutgoing ? 'ml-auto items-end' : 'mr-auto items-start'}`}>
+    <div data-message-id={message._id} data-direction={isOutgoing ? 'outgoing' : 'incoming'} className={`message-row flex w-full min-w-0 flex-col ${isOutgoing ? 'items-end' : 'items-start'}`}>
       {/* Sender Name for Group Chats */}
       {!isOutgoing && showSenderName && message.sender?.name && (
         <span className="text-[10px] font-semibold text-devs-indigo mb-1 ml-2 tracking-wide">
@@ -29,10 +29,10 @@ export const MessageBubble = memo(({ message, isOutgoing, isRead, isDelivered, s
 
       {/* Message Bubble Container */}
       <div
-        className={`relative px-3.5 py-2 rounded-2xl text-sm min-w-0 [overflow-wrap:anywhere] ${
+        className={`relative max-w-[85%] sm:max-w-[75%] lg:max-w-[65%] px-4 py-3 rounded-2xl text-sm min-w-0 [overflow-wrap:anywhere] ${
           isOutgoing
-            ? 'bubble-outgoing rounded-tr-xs'
-            : 'bubble-incoming rounded-tl-xs'
+            ? 'bubble-outgoing rounded-br-md'
+            : 'bubble-incoming rounded-bl-md'
         }`}
       >
         {/* Image Attachment */}
