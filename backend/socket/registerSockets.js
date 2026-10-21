@@ -19,17 +19,17 @@ const onlineUsersMap = new Map();
 
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
-  let connectedUserId = null;
-
-  socket.on("setup", (user) => {
-    const userId = socket.data.userId;
-    connectedUserId = userId;
-    socket.join(userId);
-    onlineUsersMap.set(userId, socket.id);
-    console.log(`User connected & setup in room: ${userId}`);
+  const userId = socket.data.userId;
+  const sockets = onlineUsersMap.get(userId) || new Set();
+  sockets.add(socket.id);
+  onlineUsersMap.set(userId, sockets);
+  socket.join(userId);
+  const announce = () => {
     socket.emit("connected");
-    io.emit("get-online-users", Array.from(onlineUsersMap.keys()));
-  });
+    io.emit("get-online-users", [...onlineUsersMap.keys()]);
+  };
+  socket.on("setup", announce);
+  announce();
 
   socket.on("join-chat", (chatId) => {
     if (!chatId) return;
@@ -71,10 +71,9 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
-    if (connectedUserId) {
-      onlineUsersMap.delete(connectedUserId);
-      io.emit("get-online-users", Array.from(onlineUsersMap.keys()));
-    }
+    sockets.delete(socket.id);
+    if (!sockets.size) onlineUsersMap.delete(userId);
+    io.emit("get-online-users", [...onlineUsersMap.keys()]);
   });
 });
 }
