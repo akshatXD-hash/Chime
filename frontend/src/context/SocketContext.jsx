@@ -1,3 +1,4 @@
+import { getSession } from '../utils/session';
 import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
@@ -36,7 +37,8 @@ export const SocketProvider = ({ children }) => {
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
       timeout: 20000,
-      transports: ['websocket', 'polling'],
+      transports: ['polling', 'websocket'],
+      auth: (done) => done({ token: getSession()?.token }),
     });
 
     newSocket.on('connect', () => {
@@ -77,6 +79,11 @@ export const SocketProvider = ({ children }) => {
     newSocket.on('connect_error', (err) => {
       console.warn('Socket connection error:', err.message);
       setConnectionStatus('disconnected');
+      setSocketConnected(false);
+      setOnlineUsers([]);
+      if (err.data?.code === 'SESSION_EXPIRED') {
+        window.dispatchEvent(new CustomEvent('chime:auth-expired'));
+      }
     });
 
     setSocket(newSocket);
