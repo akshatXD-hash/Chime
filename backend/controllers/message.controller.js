@@ -46,6 +46,7 @@ export const sendMessage = async (req, res) => {
             return res.status(403).json({ message: "You no longer have access to this conversation." });
         }
         const message = await Message.create({
+            clientMessageId: typeof req.body.clientMessageId === "string" ? req.body.clientMessageId.slice(0, 128) : undefined,
             sender: req.user.id,
             content,
             chat: chatId

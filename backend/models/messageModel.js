@@ -8,6 +8,8 @@ const messageSchema = new mongoose.Schema(
       required: true,
     },
 
+    clientMessageId: { type: String, maxlength: 128 },
+
     deliveredTo: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 
     readBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],

@@ -3,7 +3,7 @@ import { chatApi } from '../api/chatApi';
 import { messageApi } from '../api/messageApi';
 import { useAuth } from './AuthContext';
 import { useSocket } from './SocketContext';
-import { mergeMessage, applyReceipt } from '../utils/messageReceipts';
+import { mergeMessage, applyReceipt, upsertMessage } from '../utils/messageReceipts';
 import { areIdsEqual } from '../utils/chatUtils';
 
 const ChatContext = createContext(null);
@@ -33,9 +33,11 @@ export const ChatProvider = ({ children }) => {
   const [messages, setMessages] = useState([]);
   const messageCacheRef = useRef(new Map());
   const draftsRef = useRef(new Map());
+  const pendingReceiptsRef = useRef(new Map());
   const updateChatMessages = useCallback((chatId, update) => {
     const cache = messageCacheRef.current;
-    const next = typeof update === 'function' ? update(cache.get(chatId) || []) : update;
+    const updated = typeof update === 'function' ? update(cache.get(chatId) || []) : update;
+    const next = updated.map((message) => (pendingReceiptsRef.current.get(message._id) || []).reduce(applyReceipt, message));
     cache.delete(chatId);
     cache.set(chatId, next);
     if (cache.size > 30) cache.delete(cache.keys().next().value);
@@ -224,6 +226,12 @@ export const ChatProvider = ({ children }) => {
 
   const receiveReceipt = useCallback((receipt) => {
     if (!receipt?.chatId || !Array.isArray(receipt.messageIds) || !receipt.userId) return;
+    for (const id of receipt.messageIds) {
+      const receipts = pendingReceiptsRef.current.get(id) || [];
+      if (!receipts.some((item) => item.userId === receipt.userId && item.kind === receipt.kind)) receipts.push({ ...receipt, messageIds: [id] });
+      pendingReceiptsRef.current.set(id, receipts);
+    }
+    while (pendingReceiptsRef.current.size > 1000) pendingReceiptsRef.current.delete(pendingReceiptsRef.current.keys().next().value);
     updateChatMessages(receipt.chatId, (current) => current.map((message) => applyReceipt(message, receipt)));
     setChats((current) => current.map((chat) =>
       areIdsEqual(chat._id, receipt.chatId) && chat.latestMessage?._id
@@ -285,14 +293,11 @@ export const ChatProvider = ({ children }) => {
       if (!areIdsEqual(newMessage.sender, userId)) playNotificationSound();
 
       if (!areIdsEqual(activeChatId, chatId)) {
-        updateChatMessages(chatId, (prev) => prev.some((m) => areIdsEqual(m._id, messageId)) ? prev : [...prev, newMessage]);
+        updateChatMessages(chatId, (prev) => upsertMessage(prev, newMessage));
       }
       // If this message belongs to the currently active chat
       if (activeChatId && areIdsEqual(activeChatId, chatId)) {
-        updateChatMessages(chatId, (prev) => {
-          if (prev.some((m) => areIdsEqual(m._id, newMessage._id))) return prev;
-          return [...prev, newMessage];
-        });
+        updateChatMessages(chatId, (prev) => upsertMessage(prev, newMessage));
       } else if (!areIdsEqual(newMessage.sender, userId)) {
         // Increment unread count for other chats
         setUnreadMap((prev) => ({
@@ -421,6 +426,7 @@ export const ChatProvider = ({ children }) => {
     const tempId = 'temp_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
     const tempMessage = {
       _id: tempId,
+      clientMessageId: tempId,
       content,
       sender: user,
       chat: currentChat,
@@ -442,12 +448,12 @@ export const ChatProvider = ({ children }) => {
 
     try {
       // 2. Persist to server
-      const message = await messageApi.sendMessage(content, currentChat._id);
+      const message = await messageApi.sendMessage(content, currentChat._id, tempId);
 
       // 3. Replace temp message with server response
-      updateChatMessages(currentChat._id, (prev) =>
-        prev.map((m) => (m._id === tempId ? message : m))
-      );
+      updateChatMessages(currentChat._id, (prev) => upsertMessage(
+        prev.filter((m) => m._id !== tempId), message
+      ));
 
       // 5. Update chats list with final saved message
       setChats((prev) =>

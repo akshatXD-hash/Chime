@@ -25,3 +25,13 @@ export function isMessageDelivered(message, users) {
   const delivered = new Set([...(message.deliveredTo || []), ...(message.readBy || [])].map(idOf));
   return recipients.length > 0 && recipients.every((id) => delivered.has(id));
 }
+
+export function upsertMessage(messages, incoming) {
+  const previous = messages.find((message) => message._id === incoming._id ||
+    (incoming.clientMessageId && message.clientMessageId === incoming.clientMessageId));
+  const merged = mergeMessage(previous, incoming);
+  merged.isOptimistic = Boolean(incoming.isOptimistic);
+  return [...messages.filter((message) => message._id !== incoming._id &&
+    (!incoming.clientMessageId || message.clientMessageId !== incoming.clientMessageId)), merged]
+    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+}

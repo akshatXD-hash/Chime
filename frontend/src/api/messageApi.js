@@ -16,8 +16,8 @@ export const messageApi = {
     return response.data;
   },
 
-  sendMessage: async (content, chatId) => {
-    const response = await axiosClient.post('/api/message', { content, chatId });
+  sendMessage: async (content, chatId, clientMessageId) => {
+    const response = await axiosClient.post('/api/message', { content, chatId, clientMessageId });
     return response.data;
   },
 };
