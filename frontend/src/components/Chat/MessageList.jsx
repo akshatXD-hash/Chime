@@ -122,7 +122,7 @@ export const MessageList = () => {
       const node = scrollRef.current;
       nearBottomRef.current = node.scrollHeight - node.scrollTop - node.clientHeight < 100;
       if (nearBottomRef.current) setShowJump(false);
-    }} onLoadCapture={() => { if (nearBottomRef.current) scrollToBottom(false); }} className="message-list flex-1 min-h-0 overflow-y-auto px-4 py-5 md:px-8 space-y-3 bg-devs-bg relative selection:bg-devs-blue selection:text-white" aria-label="Conversation messages" aria-busy={loadingMessages}>
+    }} onLoadCapture={() => { if (nearBottomRef.current) scrollToBottom(false); }} className="message-list flex-1 min-h-0 overflow-y-auto px-4 py-5 md:px-8 bg-devs-bg relative selection:bg-devs-blue selection:text-white" aria-label="Conversation messages" aria-busy={loadingMessages}>
       {loadingMessages && messages.length === 0 && (
         <div className="flex items-center justify-center h-full text-xs text-devs-textMuted">
           Loading conversation messages...
@@ -153,6 +153,8 @@ export const MessageList = () => {
         const prevMessage = messages[index - 1];
         const prevDateLabel = prevMessage ? getDateLabel(prevMessage.createdAt) : null;
         const showDateDivider = currentDateLabel && currentDateLabel !== prevDateLabel;
+        const startsRun = !prevMessage || showDateDivider || !areIdsEqual(prevMessage.sender, senderId) ||
+          new Date(message.createdAt) - new Date(prevMessage.createdAt) > 5 * 60 * 1000;
 
         return (
           <React.Fragment key={message._id || index}>
@@ -169,7 +171,8 @@ export const MessageList = () => {
               isOutgoing={isOutgoing}
               isDelivered={isMessageDelivered(message, selectedChat?.users)}
               isRead={isMessageRead(message, selectedChat?.users)}
-              showSenderName={true}
+              startsRun={startsRun}
+              showSenderName={startsRun}
               senderName={message.sender?.name || selectedChat?.users?.find((member) => areIdsEqual(member, senderId))?.name || 'Unknown sender'}
               onImageClick={(url) => setLightboxImage(url)}
             />

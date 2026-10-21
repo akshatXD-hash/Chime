@@ -2,7 +2,7 @@ import { Avatar } from '../Common/Avatar';
 import React, { memo } from 'react';
 import { Check, CheckCheck, Clock } from 'lucide-react';
 
-export const MessageBubble = memo(({ message, isOutgoing, isRead, isDelivered, senderName, showSenderName, onImageClick }) => {
+export const MessageBubble = memo(({ message, isOutgoing, isRead, isDelivered, startsRun, senderName, showSenderName, onImageClick }) => {
 
   const formatTime = (dateString) => {
     if (!dateString) return '';
@@ -20,7 +20,7 @@ export const MessageBubble = memo(({ message, isOutgoing, isRead, isDelivered, s
   const isAudioUrl = message.content?.match(/\.(mp3|wav|ogg|m4a)($|\?)/i) || message.content?.startsWith('data:audio/');
 
   return (
-    <div data-message-id={message._id} data-direction={isOutgoing ? 'outgoing' : 'incoming'} className={`message-row flex w-full min-w-0 flex-col ${isOutgoing ? 'items-end' : 'items-start'}`}>
+    <div data-message-id={message._id} data-direction={isOutgoing ? 'outgoing' : 'incoming'} className={`message-row flex w-full min-w-0 flex-col ${startsRun ? 'mt-6' : 'mt-2'} ${isOutgoing ? 'items-end' : 'items-start'}`}>
       {showSenderName && (
         <div className="mb-1.5 flex items-center gap-2 text-xs text-devs-textSecondary">
           {!isOutgoing && <span className="h-6 w-6 overflow-hidden rounded-full"><Avatar src={message.sender?.pic} name={senderName} /></span>}
