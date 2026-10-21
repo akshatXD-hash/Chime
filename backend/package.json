@@ -24,5 +24,9 @@
     "nodemon": "^3.1.14",
     "socket.io": "^4.8.3",
     "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^11.3.0",
+    "socket.io-client": "^4.8.4"
   }
 }
