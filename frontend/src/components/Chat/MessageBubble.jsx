@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { Check, CheckCheck, Clock } from 'lucide-react';
 
-export const MessageBubble = memo(({ message, isOutgoing, isRead, showSenderName, onImageClick }) => {
+export const MessageBubble = memo(({ message, isOutgoing, isRead, isDelivered, showSenderName, onImageClick }) => {
 
   const formatTime = (dateString) => {
     if (!dateString) return '';
@@ -62,9 +62,10 @@ export const MessageBubble = memo(({ message, isOutgoing, isRead, showSenderName
         >
           <span>{formatTime(message.createdAt)}</span>
           {isOutgoing && (
-            <span title={message.isOptimistic ? 'Sending' : isRead ? 'Read' : 'Sent'}>
+            <span title={message.isOptimistic ? 'Sending' : isRead ? 'Read' : isDelivered ? 'Delivered' : 'Sent'}>
               {message.isOptimistic ? <Clock aria-label="Sending" className="w-3.5 h-3.5" /> : isRead
                 ? <CheckCheck aria-label="Read" className="w-3.5 h-3.5 text-sky-400" />
+                : isDelivered ? <CheckCheck aria-label="Delivered" className="w-3.5 h-3.5 text-slate-300" />
                 : <Check aria-label="Sent" className="w-3.5 h-3.5 text-slate-300" />}
             </span>
           )}

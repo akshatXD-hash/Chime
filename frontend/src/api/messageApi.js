@@ -6,6 +6,11 @@ export const messageApi = {
     return response.data;
   },
 
+  markDelivered: async (chatId, messageIds) => {
+    const response = await axiosClient.patch(`/api/message/${chatId}/delivered`, { messageIds });
+    return response.data;
+  },
+
   markRead: async (chatId, messageIds) => {
     const response = await axiosClient.patch(`/api/message/${chatId}/read`, { messageIds });
     return response.data;

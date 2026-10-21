@@ -209,6 +209,10 @@ export const ChatProvider = ({ children }) => {
         current.forEach((m) => merged.set(m._id, mergeMessage(m, merged.get(m._id) || m)));
         return [...merged.values()].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
       });
+      const incoming = (Array.isArray(data) ? data : []).filter((m) => !areIdsEqual(m.sender, userId) && !(m.deliveredTo || []).some((id) => areIdsEqual(id, userId)));
+      for (let i = 0; i < incoming.length; i += 100) {
+        messageApi.markDelivered(chatId, incoming.slice(i, i + 100).map((m) => m._id)).then(receiveReceipt).catch(() => {});
+      }
       setUnreadMap((prev) => ({ ...prev, [chatId]: 0 }));
     }).catch((err) => {
       if (active) setMessageError(err.message || 'Could not load messages');
@@ -235,7 +239,11 @@ export const ChatProvider = ({ children }) => {
   useEffect(() => {
     if (!socket) return;
     socket.on('messages-read', receiveReceipt);
-    return () => socket.off('messages-read', receiveReceipt);
+    socket.on('messages-delivered', receiveReceipt);
+    return () => {
+      socket.off('messages-read', receiveReceipt);
+      socket.off('messages-delivered', receiveReceipt);
+    };
   }, [socket, receiveReceipt]);
 
   // Cleanup all typing timeouts on unmount
@@ -269,6 +277,9 @@ export const ChatProvider = ({ children }) => {
       const chatOfMessage = newMessage.chat;
       const chatId = typeof chatOfMessage === 'object' ? chatOfMessage._id : chatOfMessage;
       const activeChatId = selectedChatRef.current?._id;
+      if (!areIdsEqual(newMessage.sender, userId)) {
+        messageApi.markDelivered(chatId, [messageId]).then(receiveReceipt).catch(() => {});
+      }
 
       // Play sound for incoming messages
       if (!areIdsEqual(newMessage.sender, userId)) playNotificationSound();

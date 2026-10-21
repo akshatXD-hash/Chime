@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useChat, areIdsEqual } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
-import { isMessageRead } from '../../utils/messageReceipts';
+import { isMessageRead, isMessageDelivered } from '../../utils/messageReceipts';
 import { MessageBubble } from './MessageBubble';
 import { MessageCircle, X, ArrowDown } from 'lucide-react';
 
@@ -167,6 +167,7 @@ export const MessageList = () => {
             <MessageBubble
               message={message}
               isOutgoing={isOutgoing}
+              isDelivered={isMessageDelivered(message, selectedChat?.users)}
               isRead={isMessageRead(message, selectedChat?.users)}
               showSenderName={Boolean(selectedChat?.isGroupChat)}
               onImageClick={(url) => setLightboxImage(url)}
