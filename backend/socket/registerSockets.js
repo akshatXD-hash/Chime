@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+import { Chat } from "../models/chatModel.js";
 import jwt from "jsonwebtoken";
 
 export function registerSockets(io) {
@@ -31,23 +33,20 @@ io.on("connection", (socket) => {
   socket.on("setup", announce);
   announce();
 
-  socket.on("join-chat", (chatId) => {
-    if (!chatId) return;
-    socket.join(chatId.toString());
-    console.log(`Joined chat room: ${chatId}`);
+  socket.on("join-chat", async (chatId) => {
+    if (!mongoose.isObjectIdOrHexString(chatId)) return;
+    try {
+      if (await Chat.exists({ _id: chatId, users: userId })) socket.join(`chat:${chatId}`);
+    } catch (err) { console.error("Could not join conversation:", err.message); }
   });
 
-  socket.on("typing", (chatId) => {
-    if (chatId) {
-      socket.to(chatId.toString()).emit("typing", chatId);
-    }
-  });
+  socket.on("leave-chat", (chatId) => socket.leave(`chat:${chatId}`));
 
-  socket.on("stop-typing", (chatId) => {
-    if (chatId) {
-      socket.to(chatId.toString()).emit("stop-typing", chatId);
-    }
-  });
+  for (const event of ["typing", "stop-typing"]) {
+    socket.on(event, (chatId) => {
+      if (socket.rooms.has(`chat:${chatId}`)) socket.to(`chat:${chatId}`).emit(event, chatId);
+    });
+  }
 
   socket.on("send-message", (message) => {
     const { chat, sender } = message;

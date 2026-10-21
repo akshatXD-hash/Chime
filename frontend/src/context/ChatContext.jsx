@@ -168,6 +168,7 @@ export const ChatProvider = ({ children }) => {
 
   useEffect(() => {
     if (socket?.connected && selectedChat?._id) socket.emit('join-chat', selectedChat._id);
+    return () => { if (selectedChat?._id) socket?.emit('leave-chat', selectedChat._id); };
   }, [selectedChat?._id, socket]);
 
   // Clear typing state when switching chats
