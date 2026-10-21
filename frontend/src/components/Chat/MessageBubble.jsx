@@ -52,22 +52,22 @@ export const MessageBubble = memo(({ message, isOutgoing, isRead, isDelivered, s
           <audio controls preload="none" src={message.content} aria-label="Audio message" className="max-w-full w-64" />
         ) : (
           /* Text Content */
-          <p className="whitespace-pre-wrap leading-relaxed text-sm">{message.content}</p>
+          <p className="whitespace-pre-wrap leading-relaxed text-[15px]">{message.content}</p>
         )}
 
         {/* Timestamp & Read Status Ticks */}
         <div
-          className={`flex items-center justify-end gap-1 mt-0.5 text-[11px] ${
+          className={`flex items-center justify-end gap-1.5 mt-1.5 text-[11px] ${
             isOutgoing ? 'text-indigo-100/80' : 'text-devs-textMuted'
           }`}
         >
           <span>{formatTime(message.createdAt)}</span>
           {isOutgoing && (
             <span title={message.isOptimistic ? 'Sending' : isRead ? 'Read' : isDelivered ? 'Delivered' : 'Sent'}>
-              {message.isOptimistic ? <Clock aria-label="Sending" className="w-3.5 h-3.5" /> : isRead
-                ? <CheckCheck aria-label="Read" className="w-3.5 h-3.5 text-sky-400" />
-                : isDelivered ? <CheckCheck aria-label="Delivered" className="w-3.5 h-3.5 text-slate-300" />
-                : <Check aria-label="Sent" className="w-3.5 h-3.5 text-slate-300" />}
+              {message.isOptimistic ? <Clock aria-label="Sending" className="w-4 h-4" /> : isRead
+                ? <CheckCheck aria-label="Read" className="w-4 h-4 text-sky-400" />
+                : isDelivered ? <CheckCheck aria-label="Delivered" className="w-4 h-4 text-slate-300" />
+                : <Check aria-label="Sent" className="w-4 h-4 text-slate-300" />}
             </span>
           )}
         </div>

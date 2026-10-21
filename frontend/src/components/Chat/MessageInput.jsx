@@ -36,7 +36,8 @@ export const MessageInput = () => {
   useEffect(() => {
     if (!inputRef.current) return;
     inputRef.current.style.height = 'auto';
-    inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 144)}px`;
+    inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight + 2, 144)}px`;
+    inputRef.current.style.overflowY = inputRef.current.scrollHeight > 144 ? 'auto' : 'hidden';
   }, [text]);
 
   const changeText = (value) => {

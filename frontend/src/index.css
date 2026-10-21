@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @layer base {
-  body { margin: 0; background: #141817; color: #F8FAFC; font-family: Inter, system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+  body { margin: 0; background: #141817; color: #F8FAFC; font-family: ui-sans-serif, system-ui, 'Segoe UI', Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
   button, input, textarea { font: inherit; }
   button:disabled { cursor: not-allowed; }
   :focus-visible { outline: 2px solid #92CEB7; outline-offset: 3px; }

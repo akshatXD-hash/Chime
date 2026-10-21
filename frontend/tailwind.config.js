@@ -30,7 +30,7 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['Inter', 'Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+        sans: ['ui-sans-serif', 'system-ui', 'Segoe UI', 'Arial', 'sans-serif'],
       },
       boxShadow: {
         'glow-blue': '0 4px 20px -2px rgba(99, 102, 241, 0.35)',
