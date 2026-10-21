@@ -59,6 +59,7 @@ export const sendMessage = async (req, res) => {
             })
         ]);
 
+        req.app.get("io")?.to(populatedMessage.chat.users.map((user) => String(user._id))).emit("receive-message", populatedMessage);
         return res.json(populatedMessage);
 
     } catch (err) {

@@ -48,26 +48,6 @@ io.on("connection", (socket) => {
     });
   }
 
-  socket.on("send-message", (message) => {
-    const { chat, sender } = message;
-    if (!chat) return;
-
-    const senderId = (sender?._id || sender)?.toString();
-
-    if (chat.users && Array.isArray(chat.users)) {
-      chat.users.forEach((userItem) => {
-        const userId = (userItem?._id || userItem)?.toString();
-        if (!userId || userId === senderId) return;
-        socket.to(userId).emit("receive-message", message);
-      });
-    } else {
-      const chatId = (chat?._id || chat)?.toString();
-      if (chatId) {
-        socket.to(chatId).emit("receive-message", message);
-      }
-    }
-  });
-
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
     sockets.delete(socket.id);

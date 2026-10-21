@@ -271,7 +271,7 @@ export const ChatProvider = ({ children }) => {
       const activeChatId = selectedChatRef.current?._id;
 
       // Play sound for incoming messages
-      playNotificationSound();
+      if (!areIdsEqual(newMessage.sender, userId)) playNotificationSound();
 
       if (!areIdsEqual(activeChatId, chatId)) {
         updateChatMessages(chatId, (prev) => prev.some((m) => areIdsEqual(m._id, messageId)) ? prev : [...prev, newMessage]);
@@ -282,7 +282,7 @@ export const ChatProvider = ({ children }) => {
           if (prev.some((m) => areIdsEqual(m._id, newMessage._id))) return prev;
           return [...prev, newMessage];
         });
-      } else {
+      } else if (!areIdsEqual(newMessage.sender, userId)) {
         // Increment unread count for other chats
         setUnreadMap((prev) => ({
           ...prev,
@@ -437,11 +437,6 @@ export const ChatProvider = ({ children }) => {
       updateChatMessages(currentChat._id, (prev) =>
         prev.map((m) => (m._id === tempId ? message : m))
       );
-
-      // 4. Emit socket event for real-time delivery
-      if (socket) {
-        socket.emit('send-message', message);
-      }
 
       // 5. Update chats list with final saved message
       setChats((prev) =>
