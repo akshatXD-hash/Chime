@@ -307,8 +307,7 @@ export const ChatProvider = ({ children }) => {
         messageApi.markDelivered(chatId, [messageId]).then(receiveReceipt).catch(() => {});
       }
 
-      // Play sound for incoming messages
-      if (!areIdsEqual(newMessage.sender, userId)) playNotificationSound();
+      if (!areIdsEqual(newMessage.sender, userId) && (!areIdsEqual(activeChatId, chatId) || document.visibilityState !== 'visible')) playNotificationSound();
 
       if (!areIdsEqual(activeChatId, chatId)) {
         updateChatMessages(chatId, (prev) => upsertMessage(prev, newMessage));

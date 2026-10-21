@@ -317,7 +317,7 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
                       {latestMsg
                         ? typeof latestMsg === 'string'
                           ? latestMsg
-                          : `${latestMsg.sender?.name ? latestMsg.sender.name.split(' ')[0] + ': ' : ''}${latestMsg.content?.startsWith('data:image/') || /\.(png|jpe?g|gif|webp)($|\?)/i.test(latestMsg.content || '') ? 'Image' : latestMsg.content || ''}`
+                          : `${areIdsEqual(latestMsg.sender, currentUserId) ? 'You: ' : latestMsg.sender?.name ? latestMsg.sender.name.split(' ')[0] + ': ' : ''}${latestMsg.content?.startsWith('data:image/') || /\.(png|jpe?g|gif|webp)($|\?)/i.test(latestMsg.content || '') ? 'Image' : latestMsg.content || ''}`
                         : details.isGroup
                         ? `${details.membersCount} members`
                         : 'No messages yet'}

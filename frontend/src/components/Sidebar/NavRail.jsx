@@ -35,7 +35,8 @@ export const NavRail = ({ hiddenOnMobile, onOpenProfile, onOpenSettings }) => {
         {/* Profile Avatar Button */}
         <button
           onClick={onOpenProfile}
-          title={user?.name || 'Profile'}
+          title={`Signed in as ${user?.name || 'User'}`}
+          aria-label={`Your profile: ${user?.name || 'User'}`}
           className="relative w-9 h-9 md:w-10 md:h-10 rounded-2xl border border-devs-border hover:border-devs-blue/60 transition-all overflow-hidden flex items-center justify-center bg-devs-card shadow-subtle group"
         >
           <Avatar src={user?.pic} name={user?.name} />
