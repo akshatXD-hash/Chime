@@ -13,7 +13,7 @@ export { areIdsEqual };
 export const ChatProvider = ({ children }) => {
 
   const { user } = useAuth();
-  const { socket, playNotificationSound } = useSocket();
+  const { socket, socketConnected, playNotificationSound } = useSocket();
 
   const userId = user?._id || user?.id;
 
@@ -223,6 +223,24 @@ export const ChatProvider = ({ children }) => {
     });
     return () => { active = false; };
   }, [selectedChat?._id, messageRevision, updateChatMessages]);
+
+  useEffect(() => {
+    if (!selectedChat?._id) return;
+    let lastSync = 0;
+    const sync = () => {
+      if (document.visibilityState !== 'visible' || Date.now() - lastSync < 3000) return;
+      lastSync = Date.now();
+      setMessageRevision((revision) => revision + 1);
+    };
+    const timer = !socketConnected ? setInterval(sync, 15000) : null;
+    window.addEventListener('focus', sync);
+    document.addEventListener('visibilitychange', sync);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('focus', sync);
+      document.removeEventListener('visibilitychange', sync);
+    };
+  }, [selectedChat?._id, socketConnected]);
 
   const receiveReceipt = useCallback((receipt) => {
     if (!receipt?.chatId || !Array.isArray(receipt.messageIds) || !receipt.userId) return;
