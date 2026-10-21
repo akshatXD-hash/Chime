@@ -1,3 +1,4 @@
+import { registerSockets } from "./socket/registerSockets.js";
 import express from "express";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
@@ -59,72 +60,4 @@ const io = new Server(server, {
   pingTimeout: 60000,
 });
 app.set("io", io);
-const onlineUsersMap = new Map();
-
-io.on("connection", (socket) => {
-  console.log("A user connected:", socket.id);
-  let connectedUserId = null;
-
-  // User logs in / setups socket connection
-  socket.on("setup", (user) => {
-    if (!user?._id) return;
-    const userId = user._id.toString();
-    connectedUserId = userId;
-    socket.join(userId);
-    onlineUsersMap.set(userId, socket.id);
-    console.log(`User connected & setup in room: ${userId}`);
-    socket.emit("connected");
-    io.emit("get-online-users", Array.from(onlineUsersMap.keys()));
-  });
-
-  // User opens a chat
-  socket.on("join-chat", (chatId) => {
-    if (!chatId) return;
-    socket.join(chatId.toString());
-    console.log(`Joined chat room: ${chatId}`);
-  });
-
-  // Typing indicator
-  socket.on("typing", (chatId) => {
-    if (chatId) {
-      socket.to(chatId.toString()).emit("typing", chatId);
-    }
-  });
-
-  socket.on("stop-typing", (chatId) => {
-    if (chatId) {
-      socket.to(chatId.toString()).emit("stop-typing", chatId);
-    }
-  });
-
-  // New message
-  socket.on("send-message", (message) => {
-    const { chat, sender } = message;
-    if (!chat) return;
-
-    const senderId = (sender?._id || sender)?.toString();
-
-    // Emit directly to each recipient's personal room in the chat
-    if (chat.users && Array.isArray(chat.users)) {
-      chat.users.forEach((userItem) => {
-        const userId = (userItem?._id || userItem)?.toString();
-        if (!userId || userId === senderId) return;
-        socket.to(userId).emit("receive-message", message);
-      });
-    } else {
-      // Fallback: emit to chat room if users array is not populated
-      const chatId = (chat?._id || chat)?.toString();
-      if (chatId) {
-        socket.to(chatId).emit("receive-message", message);
-      }
-    }
-  });
-
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
-    if (connectedUserId) {
-      onlineUsersMap.delete(connectedUserId);
-      io.emit("get-online-users", Array.from(onlineUsersMap.keys()));
-    }
-  });
-});
+registerSockets(io);
