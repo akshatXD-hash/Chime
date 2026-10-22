@@ -36,12 +36,12 @@ export const ChatHeader = ({ onToggleDetails, onBackMobile, onStartCall }) => {
   const membersCount = Array.isArray(selectedChat.users) ? selectedChat.users.length : 0;
 
   return (
-    <div className="h-16 px-4 bg-devs-surface/95 border-b border-devs-border/80 flex items-center justify-between z-10 select-none flex-shrink-0">
+    <div className="h-16 px-2 sm:px-4 gap-1 bg-devs-surface/95 border-b border-devs-border/80 flex items-center justify-between z-10 select-none flex-shrink-0">
       {/* Left: Back Button (Mobile) & Contact Info */}
-      <div className="flex items-center gap-3 min-w-0">
+      <div className="flex flex-1 items-center gap-2 sm:gap-3 min-w-0">
         <button
           onClick={onBackMobile}
-          className="md:hidden p-2 -ml-1 rounded-xl text-devs-textSecondary hover:text-white active:bg-devs-hover transition-colors flex items-center justify-center"
+          className="touch-target md:hidden p-2 rounded-xl text-devs-textSecondary hover:text-white active:bg-devs-hover transition-colors flex items-center justify-center"
           title="Back to Chats"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -62,11 +62,11 @@ export const ChatHeader = ({ onToggleDetails, onBackMobile, onStartCall }) => {
         </div>
 
         {/* Info */}
-        <div onClick={onToggleDetails} className="min-w-0 cursor-pointer">
+        <div onClick={onToggleDetails} className="min-w-0 flex-1 cursor-pointer">
           <h2 className="text-sm font-semibold text-white truncate flex items-center gap-2">
             <span className="truncate">{title}</span>
             {isGroup && (
-              <span className="text-[10px] px-1.5 py-0.2 rounded bg-devs-indigo/15 text-devs-indigo font-medium flex-shrink-0">
+              <span className="hidden sm:inline text-[10px] px-1.5 py-0.2 rounded bg-devs-indigo/15 text-devs-indigo font-medium flex-shrink-0">
                 {membersCount} members
               </span>
             )}
@@ -107,20 +107,20 @@ export const ChatHeader = ({ onToggleDetails, onBackMobile, onStartCall }) => {
       </div>
 
       {/* Right: Actions */}
-      <div className="flex items-center gap-1 text-devs-textSecondary">
+      <div className="flex shrink-0 items-center gap-1 text-devs-textSecondary">
         {onStartCall && !isGroup && (
           <>
             <button
               onClick={() => onStartCall('audio')}
               title="Start Voice Call"
-              className="p-2 rounded-xl hover:bg-devs-hover hover:text-white transition-colors"
+              className="touch-target p-2 rounded-xl hover:bg-devs-hover hover:text-white transition-colors"
             >
               <Phone className="w-4 h-4" />
             </button>
             <button
               onClick={() => onStartCall('video')}
               title="Start Video Call"
-              className="p-2 rounded-xl hover:bg-devs-hover hover:text-white transition-colors"
+              className="touch-target p-2 rounded-xl hover:bg-devs-hover hover:text-white transition-colors"
             >
               <Video className="w-4 h-4" />
             </button>
@@ -129,7 +129,7 @@ export const ChatHeader = ({ onToggleDetails, onBackMobile, onStartCall }) => {
         <button
           onClick={onToggleDetails}
           title="Conversation Details"
-          className="p-2 rounded-xl hover:bg-devs-hover hover:text-white transition-colors"
+          className="touch-target p-2 rounded-xl hover:bg-devs-hover hover:text-white transition-colors"
         >
           <Info className="w-4 h-4" />
         </button>
