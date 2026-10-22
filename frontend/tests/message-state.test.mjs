@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mergeMessage, applyReceipt, isMessageRead } from '../src/utils/messageReceipts.js';
+import { mergeMessage, applyReceipt, isMessageRead, isMessageDelivered, upsertMessage } from '../src/utils/messageReceipts.js';
 import { getErrorMessage, SESSION_EXPIRED } from '../src/utils/errorMessages.js';
 
 const message = { _id: 'message', sender: { _id: 'sender' }, content: 'Hello' };
@@ -33,4 +33,23 @@ test('network, timeout, server and signup errors never expose raw diagnostics', 
   assert.match(getErrorMessage({ code: 'ECONNABORTED' }), /longer than expected/);
   assert.match(getErrorMessage({ response: { status: 500, data: { message: 'MongoServerError: secret' } } }), /our end/);
   assert.match(getErrorMessage({ response: { status: 409 }, config: { url: '/api/auth/signup' } }), /already exists/);
+});
+
+test('delivery does not imply reading and read receipts imply delivery', () => {
+  const delivered = applyReceipt(message, { messageIds: ['message'], userId: 'reader', kind: 'delivered' });
+  assert.equal(isMessageDelivered(delivered, ['sender', 'reader']), true);
+  assert.equal(isMessageRead(delivered, ['sender', 'reader']), false);
+  const read = applyReceipt(message, { messageIds: ['message'], userId: 'reader', kind: 'read' });
+  assert.equal(isMessageDelivered(read, ['sender', 'reader']), true);
+  assert.equal(isMessageRead(read, ['sender', 'reader']), true);
+});
+
+test('socket echoes replace pending messages and keep receipts from earlier echoes', () => {
+  const pending = { ...message, _id: 'pending', clientMessageId: 'request', isOptimistic: true };
+  const saved = { ...message, clientMessageId: 'request' };
+  const echoed = upsertMessage([pending], { ...saved, readBy: ['reader'] });
+  const confirmed = upsertMessage(echoed, saved);
+  assert.equal(confirmed.length, 1);
+  assert.equal(confirmed[0].isOptimistic, false);
+  assert.deepEqual(confirmed[0].readBy, ['reader']);
 });

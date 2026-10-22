@@ -8,6 +8,7 @@ page.on('console', (msg) => { if (msg.type() === 'error') console.log('Browser:'
 page.on('requestfailed', (req) => console.log('Request failed:', req.url(), req.failure()?.errorText));
 page.on('pageerror', (error) => { errors.push(error.message); console.error(error.message); });
 page.setDefaultTimeout(10000);
+page.setDefaultNavigationTimeout(60000);
 const me = { _id: 'me', name: 'Jamie', email: 'jamie@example.test' };
 const alex = { _id: 'alex', name: 'Alex Morgan', email: 'alex@example.test' };
 const sam = { _id: 'sam', name: 'Sam Rivera', email: 'sam@example.test', pic: '/missing-avatar.svg' };
@@ -34,10 +35,10 @@ await page.route('**/api/**', async (route) => {
   if (!url.pathname.startsWith('/api/')) return route.continue();
   if (url.pathname.includes('upload-avatar')) avatarRequests++;
   if (url.pathname === '/api/chat') return expired ? fulfill(route, { message: 'Invalid token' }, 401) : fulfill(route, chats);
-  if (url.pathname.endsWith('/read')) {
+  if (url.pathname.endsWith('/read') || url.pathname.endsWith('/delivered')) {
     const { messageIds } = request.postDataJSON();
-    readRequests.push(...messageIds);
-    return fulfill(route, { chatId: url.pathname.split('/')[3], messageIds, userId: me._id });
+    if (url.pathname.endsWith('/read')) readRequests.push(...messageIds);
+    return fulfill(route, { chatId: url.pathname.split('/')[3], messageIds, userId: me._id, kind: url.pathname.endsWith('/read') ? 'read' : 'delivered' });
   }
   if (url.pathname === '/api/user') return fulfill(route, [alex, sam]);
   if (url.pathname === '/api/message' && request.method() === 'POST') {
@@ -66,7 +67,7 @@ try {
   await page.waitForTimeout(1100);
   assert.equal(await page.getByText(/^Alex conversation only/).count(), 0, 'Slow chat A must not overwrite chat B');
   assert.ok(readRequests.includes('b1'), 'Visible incoming messages should be marked read');
-  assert.equal(await page.getByAltText('Jamie profile picture').getAttribute('src'), '/default-avatar.svg');
+  assert.equal(await page.getByAltText('Jamie profile picture').first().getAttribute('src'), '/default-avatar.svg');
   await page.waitForFunction(() => [...document.querySelectorAll('img[alt="Sam Rivera profile picture"]')].every((img) => img.getAttribute('src') === '/default-avatar.svg'));
   slowA = false;
   const input = page.getByRole('textbox', { name: 'Message', exact: true });
