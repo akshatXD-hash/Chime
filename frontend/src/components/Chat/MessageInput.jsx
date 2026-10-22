@@ -1,7 +1,7 @@
 import React, { lazy, Suspense, useState, useRef, useEffect } from 'react';
 import { useChat } from '../../context/ChatContext';
 import { useSocket } from '../../context/SocketContext';
-import { Smile, Paperclip, Send, X, Loader2 } from 'lucide-react';
+import { Smile, Paperclip, Send, X, Loader2, Plus } from 'lucide-react';
 
 const EmojiPicker = lazy(() => import('emoji-picker-react'));
 
@@ -12,6 +12,7 @@ export const MessageInput = () => {
   const [text, setText] = useState(() => draftsRef.current.get(chatId)?.text || '');
   const [attachment, setAttachment] = useState(() => draftsRef.current.get(chatId)?.attachment || null);
   const [showEmoji, setShowEmoji] = useState(false);
+  const [showTools, setShowTools] = useState(false);
   const [sending, setSending] = useState(false);
   const [reading, setReading] = useState(false);
   const [error, setError] = useState('');
@@ -53,6 +54,7 @@ export const MessageInput = () => {
   const handleSend = async (event) => {
     event?.preventDefault();
     if (busyRef.current || reading || (!text.trim() && !attachment)) return;
+    const restoreFocus = document.activeElement === inputRef.current;
     busyRef.current = true;
     setSending(true);
     setError('');
@@ -61,6 +63,7 @@ export const MessageInput = () => {
     setText('');
     setAttachment(null);
     setShowEmoji(false);
+    setShowTools(false);
     clearTimeout(typingRef.current);
     typingRef.current = null;
     socket?.emit('stop-typing', chatId);
@@ -82,7 +85,7 @@ export const MessageInput = () => {
     } finally {
       busyRef.current = false;
       setSending(false);
-      inputRef.current?.focus();
+      if (restoreFocus && (document.activeElement === document.body || document.activeElement === inputRef.current)) inputRef.current?.focus({ preventScroll: true });
     }
   };
 
@@ -104,7 +107,7 @@ export const MessageInput = () => {
   };
 
   return (
-    <div className="composer border-t border-devs-border bg-devs-surface px-4 py-3 relative flex-shrink-0">
+    <div className="composer border-t border-devs-border bg-devs-surface px-2 py-2 sm:px-4 sm:py-3 relative flex-shrink-0">
       {error && <p role="alert" className="mb-3 text-sm text-amber-200">{error}</p>}
       {showEmoji && <div className="absolute bottom-full left-2 mb-2 z-50" onKeyDown={(e) => { if (e.key === 'Escape') setShowEmoji(false); }}>
         <Suspense fallback={<p className="p-4 bg-devs-card">Loading emoji…</p>}>
@@ -114,16 +117,19 @@ export const MessageInput = () => {
       {attachment && <div className="flex items-center gap-3 mb-3">
         <img src={attachment} alt="Image ready to send" className="w-16 h-16 rounded-lg object-cover" />
         <span className="text-sm text-devs-textSecondary">Image attached</span>
-        <button aria-label="Remove image" onClick={() => setAttachment(null)}><X size={18} /></button>
+        <button className="touch-target grid place-items-center" aria-label="Remove image" onClick={() => setAttachment(null)}><X size={18} /></button>
       </div>}
-      <form onSubmit={handleSend} className="flex items-end gap-2">
-        <button type="button" aria-label="Choose emoji" aria-expanded={showEmoji} disabled={sending} onClick={() => setShowEmoji(!showEmoji)} className="composer-tool"><Smile size={20} /></button>
-        <button type="button" aria-label="Attach image" disabled={sending || reading} onClick={() => fileRef.current?.click()} className="composer-tool">{reading ? <Loader2 size={20} className="animate-spin" /> : <Paperclip size={20} />}</button>
+      <form onSubmit={handleSend} className="flex items-end gap-1.5 sm:gap-2">
+        <button type="button" aria-label="Message options" aria-expanded={showTools} onClick={() => { setShowTools(!showTools); setShowEmoji(false); }} className="composer-tool md:hidden">{showTools ? <X size={20} /> : <Plus size={20} />}</button>
+        <div className={`${showTools ? 'flex' : 'hidden'} composer-actions md:flex gap-1`}>
+        <button type="button" aria-label="Choose emoji" aria-expanded={showEmoji} disabled={sending} onClick={() => { setShowEmoji(!showEmoji); setShowTools(false); }} className="composer-tool"><Smile size={20} /></button>
+        <button type="button" aria-label="Attach image" disabled={sending || reading} onClick={() => { setShowTools(false); fileRef.current?.click(); }} className="composer-tool">{reading ? <Loader2 size={20} className="animate-spin" /> : <Paperclip size={20} />}</button>
+        </div>
         <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/gif,image/webp" onChange={handleFile} className="hidden" />
         <textarea ref={inputRef} aria-label="Message" rows={1} value={text} disabled={sending} onChange={(e) => changeText(e.target.value)} onKeyDown={(e) => {
-          if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); handleSend(); }
+          if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing && !window.matchMedia('(pointer: coarse)').matches) { e.preventDefault(); handleSend(); }
         }} placeholder="Write a message…" className="min-w-0 flex-1 resize-none rounded-xl glass-input px-3 py-2.5 text-sm leading-6 max-h-36" />
-        <button type="submit" aria-label="Send message" disabled={sending || reading || (!text.trim() && !attachment)} className="h-11 w-11 flex items-center justify-center rounded-xl bg-devs-blue hover:bg-devs-blueHover disabled:opacity-40 text-white">
+        <button type="submit" aria-label="Send message" disabled={sending || reading || (!text.trim() && !attachment)} onPointerDown={(event) => { if (document.activeElement === inputRef.current) event.preventDefault(); }} className="h-11 w-11 shrink-0 flex items-center justify-center rounded-xl bg-devs-blue hover:bg-devs-blueHover disabled:opacity-40 text-white">
           {sending ? <Loader2 size={19} className="animate-spin" /> : <Send size={19} />}
         </button>
       </form>
