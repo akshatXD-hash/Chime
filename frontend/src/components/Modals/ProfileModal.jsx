@@ -74,8 +74,8 @@ export const ProfileModal = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75  flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Your profile" tabIndex={-1} className="max-h-[90dvh] overflow-y-auto w-full max-w-sm sm:max-w-xs bg-devs-surface border-t sm:border border-devs-border/80 rounded-t-3xl sm:rounded-3xl shadow-card-dark p-6 relative animate-in fade-in slide-in-from-bottom-5 sm:zoom-in-95 duration-200">
+    <div className="viewport-layer dialog-overlay z-50 bg-black/75  flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Your profile" tabIndex={-1} className="dialog-sheet max-h-full overflow-y-auto overscroll-contain w-full max-w-sm sm:max-w-xs bg-devs-surface border-t sm:border border-devs-border/80 rounded-t-3xl sm:rounded-3xl shadow-card-dark p-6 relative animate-in fade-in slide-in-from-bottom-5 sm:zoom-in-95 duration-200">
         <div className="flex items-center justify-between pb-3.5 border-b border-devs-border/80 mb-5">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <UserIcon className="w-4 h-4 text-devs-indigo" />
@@ -86,7 +86,7 @@ export const ProfileModal = ({ isOpen, onClose }) => {
               handleCancelPreview();
               onClose();
             }}
-            className="p-1 rounded-lg text-devs-textMuted hover:text-white hover:bg-devs-hover transition-colors"
+            aria-label="Close dialog" className="touch-target grid place-items-center p-1 rounded-lg text-devs-textMuted hover:text-white hover:bg-devs-hover transition-colors"
           >
             <X className="w-4 h-4" />
           </button>

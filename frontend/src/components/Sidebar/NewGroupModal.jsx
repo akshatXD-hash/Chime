@@ -95,8 +95,8 @@ export const NewGroupModal = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75  flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-150">
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Create group" tabIndex={-1} className="max-h-[90dvh] overflow-y-auto w-full max-w-md bg-devs-surface border-t sm:border border-devs-border/80 rounded-t-3xl sm:rounded-3xl shadow-card-dark p-5 sm:p-6 overflow-hidden relative animate-in slide-in-from-bottom-5 sm:zoom-in-95 duration-200">
+    <div className="viewport-layer dialog-overlay z-50 bg-black/75  flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-150">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Create group" tabIndex={-1} className="dialog-sheet max-h-full overflow-y-auto overscroll-contain w-full max-w-md bg-devs-surface border-t sm:border border-devs-border/80 rounded-t-3xl sm:rounded-3xl shadow-card-dark p-5 sm:p-6 relative animate-in slide-in-from-bottom-5 sm:zoom-in-95 duration-200">
         <div className="flex items-center justify-between pb-3.5 border-b border-devs-border/80 mb-4">
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-devs-indigo" />
@@ -105,7 +105,7 @@ export const NewGroupModal = ({ isOpen, onClose }) => {
           <button
             aria-label="Close dialog"
             onClick={onClose}
-            className="p-1 rounded-lg text-devs-textMuted hover:text-white hover:bg-devs-hover transition-colors"
+            aria-label="Close dialog" className="touch-target grid place-items-center p-1 rounded-lg text-devs-textMuted hover:text-white hover:bg-devs-hover transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -145,12 +145,12 @@ export const NewGroupModal = ({ isOpen, onClose }) => {
                 {selectedUsers.map((u) => (
                   <span
                     key={u._id}
-                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-devs-indigo/15 border border-devs-indigo/30 text-xs text-devs-indigo font-medium"
+                    className="max-w-full inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-devs-indigo/15 border border-devs-indigo/30 text-xs text-devs-indigo font-medium"
                   >
-                    {u.name}
+                    <span className="truncate">{u.name}</span>
                     <button
                       onClick={() => toggleSelectUser(u)}
-                      className="hover:text-white transition-colors"
+                      aria-label={`Remove ${u.name}`} className="touch-target grid place-items-center hover:text-white transition-colors"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -194,7 +194,7 @@ export const NewGroupModal = ({ isOpen, onClose }) => {
                       : 'glass-card border-transparent hover:border-devs-border'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
                     <div className="w-7 h-7 rounded-xl bg-devs-card border border-devs-border overflow-hidden flex items-center justify-center font-bold text-xs text-devs-indigo flex-shrink-0">
                       <Avatar src={userItem.pic} name={userItem.name} />
                     </div>
