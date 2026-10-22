@@ -11,23 +11,23 @@ export const NavRail = ({ hiddenOnMobile, onOpenProfile, onOpenSettings }) => {
   const isConnected = socketConnected || connectionStatus === 'connected';
 
   return (
-    <div className={`${hiddenOnMobile ? 'hidden md:flex' : 'flex'} mobile-nav w-full md:w-16 lg:w-20 min-h-16 md:h-full bg-devs-surface/95 border-t md:border-t-0 md:border-r border-devs-border/80 flex flex-row md:flex-col items-center justify-between px-4 py-2 md:px-0 md:py-5 select-none z-30 flex-shrink-0 order-last md:order-first`}>
+    <div className={`${hiddenOnMobile ? 'hidden lg:flex' : 'flex'} mobile-nav w-full lg:w-16 xl:w-20 min-h-16 lg:h-full bg-devs-surface/95 border-t lg:border-t-0 lg:border-r border-devs-border/80 flex flex-row lg:flex-col items-center justify-between px-4 py-2 lg:px-0 lg:py-5 select-none z-30 flex-shrink-0 order-last lg:order-first`}>
       {/* Top / Left Section - Logo Brand Mark */}
-      <div className="flex flex-row md:flex-col items-center space-x-3 md:space-x-0 md:space-y-6">
-        <div 
-          className="touch-target w-11 h-11 md:w-10 md:h-10 rounded-2xl bg-devs-blue flex items-center justify-center  cursor-pointer transition-transform active:scale-95" 
+      <div className="flex flex-row lg:flex-col items-center space-x-3 lg:space-x-0 lg:space-y-6">
+        <div
+          className="touch-target w-11 h-11 lg:w-10 lg:h-10 rounded-2xl bg-devs-blue flex items-center justify-center  cursor-pointer transition-transform active:scale-95"
           title="Chime Workspace"
         >
-          <MessageSquare className="w-4 h-4 md:w-5 md:h-5 text-white" />
+          <MessageSquare className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
         </div>
       </div>
 
       {/* Bottom / Right Section - Settings, Profile & Logout */}
-      <div className="flex flex-row md:flex-col items-center space-x-2 md:space-x-0 md:space-y-3.5 px-0 md:px-2">
+      <div className="flex flex-row lg:flex-col items-center space-x-2 lg:space-x-0 lg:space-y-3.5 px-0 lg:px-2">
         <button
           onClick={onOpenSettings}
           title="Settings & Preferences"
-          className="touch-target w-11 h-11 md:w-10 md:h-10 rounded-xl flex items-center justify-center text-devs-textSecondary hover:bg-devs-hover hover:text-white transition-colors"
+          className="touch-target w-11 h-11 lg:w-10 lg:h-10 rounded-xl flex items-center justify-center text-devs-textSecondary hover:bg-devs-hover hover:text-white transition-colors"
         >
           <Settings className="w-4 h-4" />
         </button>
@@ -37,7 +37,7 @@ export const NavRail = ({ hiddenOnMobile, onOpenProfile, onOpenSettings }) => {
           onClick={onOpenProfile}
           title={`Signed in as ${user?.name || 'User'}`}
           aria-label={`Your profile: ${user?.name || 'User'}`}
-          className="touch-target relative w-11 h-11 md:w-10 md:h-10 rounded-2xl border border-devs-border hover:border-devs-blue/60 transition-all overflow-hidden flex items-center justify-center bg-devs-card shadow-subtle group"
+          className="touch-target relative w-11 h-11 lg:w-10 lg:h-10 rounded-2xl border border-devs-border hover:border-devs-blue/60 transition-all overflow-hidden flex items-center justify-center bg-devs-card shadow-subtle group"
         >
           <Avatar src={user?.pic} name={user?.name} />
           {/* Real-time status dot */}
@@ -52,7 +52,7 @@ export const NavRail = ({ hiddenOnMobile, onOpenProfile, onOpenSettings }) => {
         <button
           onClick={() => logout()}
           title="Sign Out"
-          className="touch-target w-11 h-11 md:w-10 md:h-10 rounded-xl flex items-center justify-center text-red-400/80 hover:bg-red-500/10 hover:text-red-400 transition-colors"
+          className="touch-target w-11 h-11 lg:w-10 lg:h-10 rounded-xl flex items-center justify-center text-red-400/80 hover:bg-red-500/10 hover:text-red-400 transition-colors"
         >
           <LogOut className="w-4 h-4" />
         </button>

@@ -92,7 +92,7 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
   };
 
   return (
-    <div className="w-full md:w-72 lg:w-[340px] min-h-0 h-full bg-devs-surface/90 md:border-r border-devs-border/80 flex flex-col z-10 flex-shrink-0 select-none overflow-hidden">
+    <div className="w-full lg:w-80 xl:w-[340px] min-h-0 h-full bg-devs-surface/90 lg:border-r border-devs-border/80 flex flex-col z-10 flex-shrink-0 select-none overflow-hidden">
       {/* Header */}
       <div className="px-3 sm:px-4 py-2 sm:py-3.5 shrink-0 border-b border-devs-border/80 flex items-center justify-between">
         <div className="flex items-center gap-2">

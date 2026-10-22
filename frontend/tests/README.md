@@ -45,3 +45,13 @@ A single grey tick means the server saved the message. Two grey ticks mean all o
 Release the frontend and backend together: the frontend uses authenticated sockets and the delivery/read endpoints. These changes add optional receipt and client-message fields; no migration is required. Older messages without receipts acquire them when recipients load/view the chat. Messages already saved under the wrong sender by the former shared-cookie bug cannot be safely reassigned automatically.
 
 Local integration checks do not measure the deployed hosting provider's cold starts or production network latency.
+
+## Mobile layout checks
+
+With Vite running on 127.0.0.1:5173 and Playwright configured as above, run `npm run test:mobile --prefix frontend` from the repository root. No database is used or downloaded.
+
+This suite covers 320px and 390px phones, 844px landscape, 768px tablets and 1024px layouts. It checks touch targets, long names, multiline mobile Enter, composer width, emoji bounds, details drawers, scrollable dialogs and registration on a short screen. It simulates a shrinking VisualViewport to check keyboard layout and verifies that reading older history keeps its scroll position. Screenshots are ignored under frontend/tests/mobile-*.png.
+
+The conversation list and chat use separate screens below 1024px. On phones, the plus button opens attachment and emoji options. Touch keyboards use Enter for a new line; the send button sends the message. Desktop Enter still sends, and Shift+Enter adds a line.
+
+Browser emulation verifies layout and viewport events; it does not replace a physical iPhone or Android keyboard check.

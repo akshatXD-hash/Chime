@@ -105,7 +105,7 @@ export const NewGroupModal = ({ isOpen, onClose }) => {
           <button
             aria-label="Close dialog"
             onClick={onClose}
-            aria-label="Close dialog" className="touch-target grid place-items-center p-1 rounded-lg text-devs-textMuted hover:text-white hover:bg-devs-hover transition-colors"
+            className="touch-target grid place-items-center p-1 rounded-lg text-devs-textMuted hover:text-white hover:bg-devs-hover transition-colors"
           >
             <X className="w-4 h-4" />
           </button>

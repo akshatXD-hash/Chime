@@ -41,7 +41,7 @@ export const ChatHeader = ({ onToggleDetails, onBackMobile, onStartCall }) => {
       <div className="flex flex-1 items-center gap-2 sm:gap-3 min-w-0">
         <button
           onClick={onBackMobile}
-          className="touch-target md:hidden p-2 rounded-xl text-devs-textSecondary hover:text-white active:bg-devs-hover transition-colors flex items-center justify-center"
+          className="touch-target lg:hidden p-2 rounded-xl text-devs-textSecondary hover:text-white active:bg-devs-hover transition-colors flex items-center justify-center"
           title="Back to Chats"
         >
           <ArrowLeft className="w-5 h-5" />

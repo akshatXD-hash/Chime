@@ -75,7 +75,7 @@ const MainLayout = () => {
   }, [selectedChat?._id]);
 
   return (
-    <div className="app-shell flex flex-col md:flex-row bg-devs-bg overflow-hidden text-devs-text select-none">
+    <div className="app-shell flex flex-col lg:flex-row bg-devs-bg overflow-hidden text-devs-text select-none">
       {/* 1. Left Vertical Nav Rail / Mobile Bottom Bar */}
       <NavRail
         hiddenOnMobile={Boolean(selectedChat)}
@@ -84,7 +84,7 @@ const MainLayout = () => {
       />
 
       {/* 2. Middle Column: Chat List Sidebar */}
-      <div className={`${selectedChat ? 'hidden md:flex' : 'flex'} flex-1 min-h-0 md:flex-initial md:h-full flex-shrink-0 w-full md:w-auto overflow-hidden`}>
+      <div className={`${selectedChat ? 'hidden lg:flex' : 'flex'} flex-1 min-h-0 lg:flex-initial lg:h-full flex-shrink-0 w-full lg:w-auto overflow-hidden`}>
         <ChatList
           onOpenSearchModal={() => setIsSearchModalOpen(true)}
           onOpenGroupModal={() => setIsGroupModalOpen(true)}
@@ -92,7 +92,7 @@ const MainLayout = () => {
       </div>
 
       {/* 3. Main Active Chat Window */}
-      <div className={`flex-1 flex flex-col min-h-0 md:h-full min-w-0 ${!selectedChat ? 'hidden md:flex' : 'flex'}`}>
+      <div className={`flex-1 flex flex-col min-h-0 lg:h-full min-w-0 ${!selectedChat ? 'hidden lg:flex' : 'flex'}`}>
         {/* Subtle Reconnecting Banner */}
         {connectionStatus !== 'connected' && (
           <div className="bg-devs-blue/15 border-b border-devs-blue/30 px-3 py-1 text-center text-[11px] text-devs-indigo font-medium flex items-center justify-center gap-1.5 animate-pulse">
