@@ -5,7 +5,7 @@ import net from 'node:net';
 import { fileURLToPath } from 'node:url';
 
 export async function startLocalServer() {
-  const mongo = await MongoMemoryServer.create();
+  const mongo = await MongoMemoryServer.create({ binary: { version: process.env.MONGOMS_VERSION || '7.0.14' } });
   const probe = net.createServer();
   probe.listen(0, '127.0.0.1');
   await once(probe, 'listening');
@@ -35,7 +35,7 @@ export async function startLocalServer() {
       child.once('exit', (code) => { clearTimeout(timeout); reject(new Error(`Local backend exited: ${code}`)); });
       child.stderr.on('data', (chunk) => process.stderr.write(chunk));
     });
-    return { url: `http://localhost:${port}`, stop };
+    return { url: `http://127.0.0.1:${port}`, stop };
   } catch (err) { await stop(); throw err; }
 }
 

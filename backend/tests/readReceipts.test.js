@@ -49,7 +49,7 @@ test('records the authenticated reader and broadcasts only matching incoming mes
   });
   t.mock.method(Message, 'updateMany', async (filter, update) => {
     assert.deepEqual(filter, { _id: { $in: [messageId] }, chat: chatId });
-    assert.deepEqual(update, { $addToSet: { readBy: reader } });
+    assert.deepEqual(update, { $addToSet: { readBy: reader, deliveredTo: reader } });
   });
   const req = request([messageId, foreignId]);
   req.body.userId = sender;
@@ -57,7 +57,7 @@ test('records the authenticated reader and broadcasts only matching incoming mes
   const res = response();
   await markMessagesRead(req, res);
   assert.equal(res.code, 200);
-  assert.deepEqual(res.body, { chatId, messageIds: [messageId], userId: reader });
+  assert.deepEqual(res.body, { chatId, messageIds: [messageId], userId: reader, kind: 'read' });
   assert.deepEqual(events, [{ rooms: [reader, sender], event: 'messages-read', payload: res.body }]);
 });
 
