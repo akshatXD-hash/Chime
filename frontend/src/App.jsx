@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Component } from 'react';
+import { useVisualViewport } from './hooks/useVisualViewport';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SocketProvider, useSocket } from './context/SocketContext';
 import { ChatProvider, useChat } from './context/ChatContext';
@@ -74,7 +75,7 @@ const MainLayout = () => {
   }, [selectedChat?._id]);
 
   return (
-    <div className="flex flex-col md:flex-row h-screen h-[100dvh] w-screen bg-devs-bg overflow-hidden text-devs-text select-none relative">
+    <div className="app-shell flex flex-col md:flex-row bg-devs-bg overflow-hidden text-devs-text select-none">
       {/* 1. Left Vertical Nav Rail / Mobile Bottom Bar */}
       <NavRail
         hiddenOnMobile={Boolean(selectedChat)}
@@ -175,6 +176,7 @@ const AuthWrapper = () => {
 };
 
 export default function App() {
+  useVisualViewport();
   return (
     <ErrorBoundary>
       <AuthProvider>
