@@ -1,3 +1,4 @@
+import { useDialog } from '../../hooks/useDialog';
 import { Avatar } from '../Common/Avatar';
 import React, { useState } from 'react';
 import { useChat, areIdsEqual } from '../../context/ChatContext';
@@ -17,6 +18,8 @@ export const ChatDetailsSidebar = ({ isOpen, onClose }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [actionUserId, setActionUserId] = useState(null);
+
+  const dialogRef = useDialog(isOpen && Boolean(selectedChat), onClose);
 
   if (!isOpen || !selectedChat) return null;
 
@@ -106,25 +109,25 @@ export const ChatDetailsSidebar = ({ isOpen, onClose }) => {
       {/* Backdrop overlay on mobile */}
       <div 
         onClick={onClose} 
-        className="fixed inset-0 bg-black/60 backdrop-blur-xs z-30 xl:hidden animate-in fade-in duration-200" 
+        className="viewport-layer bg-black/60 z-30" 
       />
 
-      <div className="fixed xl:static inset-y-0 right-0 z-40 w-full sm:w-80 xl:w-80 h-full bg-devs-surface/95 border-l border-devs-border/80 flex flex-col flex-shrink-0 select-none animate-in slide-in-from-right duration-200 shadow-card-dark xl:shadow-none">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Conversation details" tabIndex={-1} className="details-drawer fixed right-0 z-40 w-full sm:w-96 bg-devs-surface border-l border-devs-border/80 flex flex-col min-h-0 select-none shadow-card-dark">
         {/* Header */}
-        <div className="px-4 py-3.5 border-b border-devs-border/80 flex items-center justify-between">
+        <div className="shrink-0 px-4 py-2 border-b border-devs-border/80 flex items-center justify-between">
           <h3 className="text-xs font-bold text-white flex items-center gap-2">
             <Info className="w-4 h-4 text-devs-indigo" />
             <span>{isGroup ? 'Group Information' : 'Contact Details'}</span>
           </h3>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl text-devs-textMuted hover:text-white hover:bg-devs-hover transition-colors"
+            aria-label="Close conversation details" className="h-11 w-11 grid place-items-center rounded-xl text-devs-textMuted hover:text-white hover:bg-devs-hover transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-5 space-y-6">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-5 space-y-6">
           {/* Avatar & Main Info */}
           <div className="flex flex-col items-center text-center">
             <div className="w-20 h-20 rounded-2xl bg-devs-card border border-devs-border overflow-hidden flex items-center justify-center font-bold text-xl text-devs-indigo shadow-subtle mb-3">
@@ -145,7 +148,7 @@ export const ChatDetailsSidebar = ({ isOpen, onClose }) => {
                   value={newGroupName}
                   onChange={(e) => setNewGroupName(e.target.value)}
                   placeholder="New group name"
-                  className="w-full px-3 py-1.5 rounded-xl glass-input text-xs"
+                  className="min-w-0 flex-1 px-3 py-1.5 rounded-xl glass-input text-xs"
                 />
                 <button
                   onClick={handleRenameGroup}
@@ -171,7 +174,7 @@ export const ChatDetailsSidebar = ({ isOpen, onClose }) => {
               </div>
             )}
 
-            <p className="text-xs text-devs-textMuted mt-0.5">
+            <p className="text-xs text-devs-textMuted mt-0.5 break-all">
               {isGroup ? `${membersCount} members` : targetUser?.email || ''}
             </p>
           </div>
@@ -186,7 +189,7 @@ export const ChatDetailsSidebar = ({ isOpen, onClose }) => {
                 {isAdmin && (
                   <button
                     onClick={() => setShowAddMember(!showAddMember)}
-                    className="text-xs text-devs-indigo hover:text-devs-violet font-semibold flex items-center gap-1"
+                    className="touch-target text-xs text-devs-indigo hover:text-devs-violet font-semibold flex items-center gap-1"
                   >
                     <UserPlus className="w-3.5 h-3.5" />
                     <span>Add</span>
@@ -262,7 +265,7 @@ export const ChatDetailsSidebar = ({ isOpen, onClose }) => {
                           <button
                             onClick={() => handleRemoveMember(memberId)}
                             disabled={actionUserId === memberId}
-                            className="p-1 rounded-md text-red-400 hover:bg-red-500/10 hover:text-red-300 disabled:opacity-50"
+                            className="touch-target grid place-items-center p-1 rounded-md text-red-400 hover:bg-red-500/10 hover:text-red-300 disabled:opacity-50"
                             title="Remove Member"
                           >
                             {actionUserId === memberId ? (
