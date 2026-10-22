@@ -63,15 +63,15 @@ export const Register = ({ onSwitchToLogin }) => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-devs-bg flex items-center justify-center p-4 relative selection:bg-devs-blue selection:text-white">
+    <div className="viewport-layer auth-screen w-full bg-devs-bg flex flex-col items-center overflow-y-auto overscroll-contain p-4 selection:bg-devs-blue selection:text-white">
       {/* Subtle radial geometric grid background */}
 
-      <div className="w-full max-w-md bg-devs-surface/90  p-6 sm:p-8 rounded-3xl shadow-card-dark relative z-10 border border-devs-border/80 my-6">
+      <div className="auth-card shrink-0 w-full max-w-md bg-devs-surface/90 p-5 sm:p-8 rounded-3xl shadow-card-dark relative z-10 border border-devs-border/80">
         <div className="flex flex-col items-center text-center mb-6">
           <div className="w-12 h-12 rounded-2xl bg-devs-blue/10 border border-devs-blue/30 flex items-center justify-center text-devs-indigo mb-3">
             <MessageCircle className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white mb-1">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-1">
             Join <span className="devs-gradient-text">Chime</span>
           </h1>
           <p className="text-xs text-devs-textSecondary">
@@ -158,7 +158,7 @@ export const Register = ({ onSwitchToLogin }) => {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-devs-textMuted hover:text-white transition-colors"
+                className="touch-target grid place-items-center absolute right-0 top-1/2 -translate-y-1/2 text-devs-textMuted hover:text-white transition-colors"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
