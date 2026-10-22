@@ -21,6 +21,23 @@ export const MessageInput = () => {
   const typingRef = useRef(null);
   const busyRef = useRef(false);
   const readerRef = useRef(null);
+  const composerRef = useRef(null);
+
+  useEffect(() => {
+    if (!showEmoji && !showTools) return;
+    const close = (event) => {
+      if (event.key === 'Escape' || (event.type === 'pointerdown' && !composerRef.current?.contains(event.target))) {
+        setShowEmoji(false);
+        setShowTools(false);
+      }
+    };
+    document.addEventListener('pointerdown', close);
+    document.addEventListener('keydown', close);
+    return () => {
+      document.removeEventListener('pointerdown', close);
+      document.removeEventListener('keydown', close);
+    };
+  }, [showEmoji, showTools]);
 
   useEffect(() => {
     draftsRef.current.set(chatId, { text, attachment });
@@ -107,11 +124,15 @@ export const MessageInput = () => {
   };
 
   return (
-    <div className="composer border-t border-devs-border bg-devs-surface px-2 py-2 sm:px-4 sm:py-3 relative flex-shrink-0">
+    <div ref={composerRef} className="composer border-t border-devs-border bg-devs-surface px-2 py-2 sm:px-4 sm:py-3 relative flex-shrink-0">
       {error && <p role="alert" className="mb-3 text-sm text-amber-200">{error}</p>}
-      {showEmoji && <div className="absolute bottom-full left-2 mb-2 z-50" onKeyDown={(e) => { if (e.key === 'Escape') setShowEmoji(false); }}>
+      {showEmoji && <div role="region" aria-label="Emoji picker" className="emoji-popover absolute bottom-full left-2 mb-2 z-50 rounded-xl bg-devs-card border border-devs-border overflow-hidden">
+        <div className="flex h-11 items-center justify-between pl-3 text-sm text-devs-textSecondary">
+          <span>Emoji</span>
+          <button type="button" aria-label="Close emoji picker" onClick={() => setShowEmoji(false)} className="h-11 w-11 grid place-items-center"><X size={18} /></button>
+        </div>
         <Suspense fallback={<p className="p-4 bg-devs-card">Loading emoji…</p>}>
-          <EmojiPicker theme="dark" width={300} height={350} onEmojiClick={(emoji) => changeText(text + emoji.emoji)} />
+          <EmojiPicker theme="dark" width="100%" height="calc(100% - 44px)" autoFocusSearch={false} onEmojiClick={(emoji) => changeText(text + emoji.emoji)} />
         </Suspense>
       </div>}
       {attachment && <div className="flex items-center gap-3 mb-3">
