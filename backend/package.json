@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "test": "node --test tests/*.test.js",
+    "test:integration": "node tests/liveMessaging.integration.mjs"
   },
   "keywords": [],
   "author": "",
@@ -28,5 +30,10 @@
   "devDependencies": {
     "mongodb-memory-server": "^11.3.0",
     "socket.io-client": "^4.8.4"
+  },
+  "config": {
+    "mongodbMemoryServer": {
+      "disablePostinstall": true
+    }
   }
 }

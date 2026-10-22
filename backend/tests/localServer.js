@@ -5,7 +5,7 @@ import net from 'node:net';
 import { fileURLToPath } from 'node:url';
 
 export async function startLocalServer() {
-  const mongo = await MongoMemoryServer.create({ binary: { version: process.env.MONGOMS_VERSION || '7.0.14' } });
+  const mongo = await MongoMemoryServer.create({ binary: { version: process.env.MONGOMS_VERSION || '7.0.14', downloadDir: process.env.MONGOMS_DOWNLOAD_DIR || fileURLToPath(new URL('../node_modules/.cache/mongodb-binaries', import.meta.url)) } });
   const probe = net.createServer();
   probe.listen(0, '127.0.0.1');
   await once(probe, 'listening');
