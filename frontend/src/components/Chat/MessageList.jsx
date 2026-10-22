@@ -9,7 +9,6 @@ import { MessageCircle, X, ArrowDown } from 'lucide-react';
 export const MessageList = () => {
   const { user } = useAuth();
   const { messages, loadingMessages, selectedChat, typingMap, messageError, retryMessages, markMessagesRead } = useChat();
-  const messagesEndRef = useRef(null);
   const scrollRef = useRef(null);
   const nearBottomRef = useRef(true);
   const firstScrollRef = useRef(true);
@@ -20,7 +19,8 @@ export const MessageList = () => {
   const isTyping = selectedChat?._id ? typingMap[selectedChat._id] : false;
 
   const scrollToBottom = (smooth = true) => {
-    messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
+    const node = scrollRef.current;
+    node?.scrollTo({ top: node.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
   };
 
   useEffect(() => {
@@ -40,6 +40,14 @@ export const MessageList = () => {
       setShowJump(true);
     }
   }, [messages.length, isTyping, selectedChat?._id]);
+
+  useEffect(() => {
+    const observer = new ResizeObserver(() => {
+      if (nearBottomRef.current) scrollToBottom(false);
+    });
+    if (scrollRef.current) observer.observe(scrollRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!lightboxImage) return;
@@ -78,7 +86,7 @@ export const MessageList = () => {
       const node = scrollRef.current;
       nearBottomRef.current = node.scrollHeight - node.scrollTop - node.clientHeight < 100;
       if (nearBottomRef.current) setShowJump(false);
-    }} onLoadCapture={() => { if (nearBottomRef.current) scrollToBottom(false); }} className="message-list flex-1 min-h-0 overflow-y-auto px-4 py-5 md:px-8 bg-devs-bg relative selection:bg-devs-blue selection:text-white" aria-label="Conversation messages" aria-busy={loadingMessages}>
+    }} onLoadCapture={() => { if (nearBottomRef.current) scrollToBottom(false); }} className="message-list flex-1 min-h-0 overflow-y-auto px-3 py-3 md:py-5 md:px-8 bg-devs-bg relative selection:bg-devs-blue selection:text-white" aria-label="Conversation messages" aria-busy={loadingMessages}>
       {loadingMessages && messages.length === 0 && (
         <div className="flex items-center justify-center h-full text-xs text-devs-textMuted">
           Loading conversation messages...
@@ -148,26 +156,25 @@ export const MessageList = () => {
         </div>
       )}
 
-      <div ref={messagesEndRef} />
       {showJump && <button onClick={() => { nearBottomRef.current = true; scrollToBottom(); setShowJump(false); }} className="sticky bottom-2 mx-auto flex items-center gap-2 rounded-full bg-devs-blue px-4 py-2 text-sm text-white shadow-lg"><ArrowDown size={16} />Latest messages</button>}
 
       {/* Lightbox Modal */}
       {lightboxImage && (
         <div
           onClick={() => setLightboxImage(null)}
-          className="fixed inset-0 z-50 bg-black/90  flex items-center justify-center p-4 cursor-zoom-out animate-in fade-in duration-150"
+          className="viewport-layer z-50 bg-black/90  flex items-center justify-center p-4 cursor-zoom-out animate-in fade-in duration-150"
         >
           <button
             aria-label="Close image preview"
             onClick={() => setLightboxImage(null)}
-            className="absolute top-4 right-4 p-2 rounded-xl bg-devs-card text-white hover:bg-devs-hover border border-devs-border"
+            className="absolute top-[max(8px,env(safe-area-inset-top))] right-[max(8px,env(safe-area-inset-right))] h-11 w-11 grid place-items-center p-2 rounded-xl bg-devs-card text-white hover:bg-devs-hover border border-devs-border"
           >
             <X className="w-5 h-5" />
           </button>
           <img
             src={lightboxImage}
             alt="Preview"
-            className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-card-dark"
+            className="max-w-full max-h-[calc(100%-72px)] object-contain rounded-2xl shadow-card-dark"
           />
         </div>
       )}

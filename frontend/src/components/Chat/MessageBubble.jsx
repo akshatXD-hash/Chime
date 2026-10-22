@@ -20,17 +20,17 @@ export const MessageBubble = memo(({ message, isOutgoing, isRead, isDelivered, s
   const isAudioUrl = message.content?.match(/\.(mp3|wav|ogg|m4a)($|\?)/i) || message.content?.startsWith('data:audio/');
 
   return (
-    <div data-message-id={message._id} data-direction={isOutgoing ? 'outgoing' : 'incoming'} className={`message-row flex w-full min-w-0 flex-col ${startsRun ? 'mt-6' : 'mt-2'} ${isOutgoing ? 'items-end' : 'items-start'}`}>
+    <div data-message-id={message._id} data-direction={isOutgoing ? 'outgoing' : 'incoming'} className={`message-row flex w-full min-w-0 flex-col ${startsRun ? 'mt-4 md:mt-6' : 'mt-1.5 md:mt-2'} ${isOutgoing ? 'items-end' : 'items-start'}`}>
       {showSenderName && (
-        <div className="mb-1.5 flex items-center gap-2 text-xs text-devs-textSecondary">
-          {!isOutgoing && <span className="h-6 w-6 overflow-hidden rounded-full"><Avatar src={message.sender?.pic} name={senderName} /></span>}
-          <span className="font-semibold">{isOutgoing ? 'You' : senderName}</span>
+        <div className="mb-1.5 max-w-[85%] min-w-0 flex items-center gap-2 text-xs text-devs-textSecondary">
+          {!isOutgoing && <span className="h-6 w-6 shrink-0 overflow-hidden rounded-full"><Avatar src={message.sender?.pic} name={senderName} /></span>}
+          <span className="font-semibold truncate">{isOutgoing ? 'You' : senderName}</span>
         </div>
       )}
 
       {/* Message Bubble Container */}
       <div
-        className={`relative max-w-[85%] sm:max-w-[75%] lg:max-w-[65%] px-4 py-3 rounded-2xl text-sm min-w-0 [overflow-wrap:anywhere] ${
+        className={`relative max-w-[85%] sm:max-w-[75%] lg:max-w-[65%] px-3 py-2 md:px-4 md:py-3 rounded-2xl text-sm min-w-0 [overflow-wrap:anywhere] ${
           isOutgoing
             ? 'bubble-outgoing rounded-br-md'
             : 'bubble-incoming rounded-bl-md'
@@ -45,7 +45,7 @@ export const MessageBubble = memo(({ message, isOutgoing, isRead, isDelivered, s
               loading="lazy"
               decoding="async"
               onClick={() => onImageClick && onImageClick(message.content)}
-              className="w-full h-auto object-cover hover:scale-102 transition-transform duration-200"
+              className="w-full h-auto max-h-[min(320px,45dvh)] object-contain hover:scale-102 transition-transform duration-200"
             />
           </div>
         ) : isAudioUrl ? (
