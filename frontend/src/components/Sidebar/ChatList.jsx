@@ -92,9 +92,9 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
   };
 
   return (
-    <div className="w-full md:w-80 lg:w-[340px] h-full bg-devs-surface/90 border-r border-devs-border/80 flex flex-col z-10 flex-shrink-0 select-none overflow-hidden">
+    <div className="w-full md:w-72 lg:w-[340px] min-h-0 h-full bg-devs-surface/90 md:border-r border-devs-border/80 flex flex-col z-10 flex-shrink-0 select-none overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3.5 border-b border-devs-border/80 flex items-center justify-between">
+      <div className="px-3 sm:px-4 py-2 sm:py-3.5 shrink-0 border-b border-devs-border/80 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-bold text-white tracking-tight">
             Messages
@@ -110,21 +110,21 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
             onClick={loadChats}
             disabled={loadingChats}
             title="Refresh conversations"
-            className="p-2 rounded-xl text-devs-textSecondary hover:text-white hover:bg-devs-hover transition-colors"
+            className="touch-target p-2 rounded-xl text-devs-textSecondary hover:text-white hover:bg-devs-hover transition-colors"
           >
             <RefreshCw className={`w-4 h-4 ${loadingChats ? 'animate-spin text-devs-indigo' : ''}`} />
           </button>
           <button
             onClick={onOpenGroupModal}
             title="Create Group Chat"
-            className="p-2 rounded-xl text-devs-textSecondary hover:text-white hover:bg-devs-hover transition-colors"
+            className="touch-target p-2 rounded-xl text-devs-textSecondary hover:text-white hover:bg-devs-hover transition-colors"
           >
             <Users className="w-4 h-4" />
           </button>
           <button
             onClick={onOpenSearchModal}
             title="New Conversation"
-            className="p-2 rounded-xl bg-devs-blue text-white hover:bg-devs-blueHover transition-colors shadow-subtle ml-1"
+            className="touch-target p-2 rounded-xl bg-devs-blue text-white hover:bg-devs-blueHover transition-colors shadow-subtle ml-1"
           >
             <MessageSquarePlus className="w-4 h-4" />
           </button>
@@ -148,7 +148,7 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
       )}
 
       {/* Search Input Bar */}
-      <div className="p-3 border-b border-devs-border/60">
+      <div className="p-3 shrink-0 border-b border-devs-border/60">
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-devs-textMuted" />
           <input
@@ -163,7 +163,7 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
             <button
               aria-label="Clear search"
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-devs-textMuted hover:text-white p-0.5"
+              className="touch-target absolute right-0 top-1/2 -translate-y-1/2 text-devs-textMuted hover:text-white grid place-items-center"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -180,7 +180,7 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
             <button
               key={tab.id}
               onClick={() => setFilterTab(tab.id)}
-              className={`px-3 py-1 rounded-full text-[11px] font-medium transition-all ${
+              className={`touch-target px-3 py-1 rounded-full text-[11px] font-medium transition-all ${
                 filterTab === tab.id
                   ? 'bg-devs-blue/20 border border-devs-blue/40 text-devs-indigo font-semibold shadow-xs'
                   : 'text-devs-textSecondary hover:text-white hover:bg-devs-hover/60 border border-transparent'
@@ -193,7 +193,7 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
       </div>
 
       {/* Chat List Body */}
-      <div className="flex-1 overflow-y-auto divide-y divide-devs-border/30">
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain divide-y divide-devs-border/30">
         {/* Loading skeleton when first loading without cached data */}
         {loadingChats && chats.length === 0 && (
           <div className="p-3 space-y-3">
@@ -297,7 +297,7 @@ export const ChatList = ({ onOpenSearchModal, onOpenGroupModal }) => {
                 {/* Info & Last message */}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-white truncate flex items-center gap-1.5">
+                    <h3 className="text-sm font-semibold text-white min-w-0 flex-1 truncate flex items-center gap-1.5">
                       <span className="truncate">{details.name}</span>
                       {details.isGroup && (
                         <span className="text-[10px] px-1.5 py-0.2 rounded bg-devs-indigo/15 text-devs-indigo font-normal flex-shrink-0">
